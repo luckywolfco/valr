@@ -66,6 +66,7 @@ object Trade {
 
 
   //Try hold off state changes for as long as possible
+  //Optimise to use indexes match the matches
   fun reshuffle(
     book: LimitOrderBook,
     bid: DataTypes.Bid,
@@ -244,13 +245,13 @@ object Trade {
     return book.trades.take(limit)
   }
 
-  fun getBidsFor(book: LimitOrderBook): List<DataTypes.Bid> {
+  fun getBidsFor(book: LimitOrderBook, limit: Int): List<MutableMap.MutableEntry<BigDecimal, MutableList<DataTypes.Bid>>> {
+    return book.bids.entries.take(limit)
 
-    return emptyList()
   }
 
-  fun getAsksFor(book: LimitOrderBook): List<DataTypes.Ask> {
-    return emptyList()
+  fun getAsksFor(book: LimitOrderBook, limit: Int): List<MutableMap.MutableEntry<BigDecimal, MutableList<DataTypes.Ask>>> {
+    return book.asks.entries.take(limit)
   }
 
   /*

@@ -4,6 +4,7 @@ import arrow.core.*
 import com.google.gson.annotations.SerializedName
 import io.vertx.core.MultiMap
 import io.vertx.core.json.JsonObject
+import java.math.BigDecimal
 
 object ApiTypes {
 
@@ -37,25 +38,65 @@ object ApiTypes {
 
   val pattern = "a-zA-Z0-9".toRegex()
 
-  class PlaceLimitOrderApiRequest(val currentPair: DataTypes.CurrencyPair) {
+  class PlaceLimitOrderApiRequest(
+    val currentPair: DataTypes.CurrencyPair,
+    val side: DataTypes.Side,
+    val quantity: BigDecimal,
+    val price: BigDecimal,
+    val postOnly: Boolean,
+    val customerOrderId: Option<String>,
+    val timeInForce: DataTypes.TimeInForce
+  ) {
     companion object {
       fun create(accountId: String, request: JsonObject): Either<Validators.ApiError, PlaceLimitOrderApiRequest> {
-        val side = request.getString("side")
-        val quantity = request.getString("quantity")
-        val pair = request.getString("pair")
-        val customerOrderId = request.getString("customerOrderId")
-        return Either.Right(PlaceLimitOrderApiRequest(DataTypes.CurrencyPair.valueOf(pair)))
+
+        val side = DataTypes.Side.valueOf(request.getString("side"))
+        val quantity = request.getString("quantity").toBigDecimal()
+        val price = request.getString("price").toBigDecimal()
+        val pair = DataTypes.CurrencyPair.valueOf(request.getString("pair"))
+        val tif =
+          Option.fromNullable(request.getString("timeInForce")).map { DataTypes.TimeInForce.valueOf(it) }
+            .getOrElse { DataTypes.TimeInForce.GTC }
+        val customerOrderId = Option.fromNullable(request.getString("customerOrderId"))
+        val postOnly = Option.fromNullable(request.getBoolean("postOnly")).getOrElse { false }
+
+        return Either.Right(
+          PlaceLimitOrderApiRequest(
+            currentPair = pair,
+            side,
+            quantity,
+            price,
+            postOnly,
+            customerOrderId,
+            tif
+          )
+        )
       }
     }
   }
 
   class GetTradeHistoryApiRequest(val currencyPair: DataTypes.CurrencyPair, val skip: Int, val limit: Int) {
     companion object {
-      fun   create(path: Map<String,String>, request: MultiMap): Either<Validators.ApiError, GetTradeHistoryApiRequest> {
+      fun create(
+        path: Map<String, String>,
+        request: MultiMap
+      ): Either<Validators.ApiError, GetTradeHistoryApiRequest> {
         val currencyPair = DataTypes.CurrencyPair.valueOf(path.getValue("currencyPair"))
         val limit = request.get("limit").parseInt(0)
         val skip = request.get("skip").parseInt(100)
         return Either.Right(GetTradeHistoryApiRequest(currencyPair, skip, limit))
+      }
+    }
+  }
+
+  class GetOrderHistoryApiRequest(val currencyPair: DataTypes.CurrencyPair, val limit: Int = 40) {
+    companion object {
+      fun create(
+        path: Map<String, String>,
+        request: MultiMap
+      ): Either<Validators.ApiError, GetOrderHistoryApiRequest> {
+        val currencyPair = DataTypes.CurrencyPair.valueOf(path.getValue("currencyPair"))
+        return Either.Right(GetOrderHistoryApiRequest(currencyPair))
       }
     }
   }
@@ -118,7 +159,8 @@ object ApiTypes {
       data class DoesNotContain(val value: String) : ApiError("Missing $value value")
       data class MaxLength(val value: Int) : ApiError("Exceeded length of $value")
       data class NotAnEmail(val reasons: Nel<ApiError>) : ApiError("Not a valid email")
-      data class InsufficientPermissions(val value: String) : ApiError("Insufficient permissions to perform this action - required $value")
+      data class InsufficientPermissions(val value: String) :
+        ApiError("Insufficient permissions to perform this action - required $value")
     }
   }
 }

@@ -1,6 +1,10 @@
 package co.luckywolf.valr.api
 
+import arrow.core.getOrElse
+import arrow.core.orElse
 import co.luckywolf.valr.exchange.Trade
+import co.luckywolf.valr.exchange.Trade.getAsksFor
+import co.luckywolf.valr.exchange.Trade.getBidsFor
 import co.luckywolf.valr.exchange.Trade.getTradesFor
 import co.luckywolf.valr.exchange.Trade.tryExecuteOrderFor
 import co.luckywolf.valr.protocol.ApiTypes
@@ -14,7 +18,6 @@ import io.vertx.ext.auth.User
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.BodyHandler
 import org.joda.time.DateTime
-import java.math.BigDecimal
 
 fun main() {
   val vertx = Vertx.vertx()
@@ -90,13 +93,46 @@ class ApiVerticle() : AbstractVerticle() {
 
     router.get("/v1/marketdata/:currencyPair/orderbook")
       .produces("application/json")
-      .consumes("application/json")
       .handler {
 
-        val accountId = it.user().getAccountId()
+        ApiTypes.GetOrderHistoryApiRequest.create(it.pathParams(), it.request().params()).map { r ->
 
-        //  val limitOrderBook = tradeEngine.limitOrderBookBy(r.currentPair)
+          val limitOrderBook = tradeEngine.limitOrderBookBy(r.currencyPair)
 
+          val asks = getAsksFor(limitOrderBook, r.limit).map { trade ->
+            trade.value.sumOf { a -> a.quantity }
+            JsonObject()
+              .put("side", DataTypes.Side.ASK.name)
+              .put("quantity", trade.value.sumOf { a -> a.quantity }.toString())
+              .put("price", trade.key.toString())
+              .put("currencyPair", r.currencyPair.name.uppercase())
+              .put("orderCount", trade.value.size)
+          }
+
+          val bids = getBidsFor(limitOrderBook, r.limit).map { trade ->
+            trade.value.sumOf { a -> a.quantity }
+            JsonObject()
+              .put("side", DataTypes.Side.BID.name)
+              .put("quantity", trade.value.sumOf { a -> a.quantity }.toString())
+              .put("price", trade.key.toString())
+              .put("currencyPair", r.currencyPair.name.uppercase())
+              .put("orderCount", trade.value.size)
+          }
+
+          it.response()
+            .setStatusCode(200)
+            .end(
+              JsonArray()
+                .add(JsonObject().put("Asks", asks))
+                .add(JsonObject().put("Bids", bids)).toBuffer()
+            )
+
+
+        }.mapLeft { err ->
+          it.response()
+            .setStatusCode(400)
+            .end(JsonObject().put("error", err.error).toBuffer())
+        }
       }
 
     router.get("/v1/marketdata/:currencyPair/tradehistory")
@@ -114,7 +150,7 @@ class ApiVerticle() : AbstractVerticle() {
                 .put("currencyPair", r.currencyPair.toString().uppercase())
                 .put("tradedAt", DateTime(trade.timestamp.toString()))
                 .put("takerSide", trade.fillSide.toString().lowercase())
-                .put("sequenceId", trade.orderId.sequence.toString())
+                .put("sequenceId", trade.tradeId.sequence.toString())
                 .put("id", trade.tradeId.id)
                 .put("quoteVolume", trade.quantity.toString())
             }
@@ -157,12 +193,12 @@ class ApiVerticle() : AbstractVerticle() {
           val result = tryExecuteOrderFor(
             limitOrderBook,
             DataTypes.Order(
-              DataTypes.Side.ASK,
-              BigDecimal(33),
-              BigDecimal(33),
+              r.side,
+              r.quantity,
+              r.price,
               r.currentPair,
-              DataTypes.TimeInForce.GTC,
-              DataTypes.Trader(accountId)
+              r.timeInForce,
+              DataTypes.Trader(accountId, r.customerOrderId)
             )
           ).map {
             rc.end()
@@ -180,8 +216,6 @@ class ApiVerticle() : AbstractVerticle() {
         }
 
       }
-
-
     return router
   }
 }
