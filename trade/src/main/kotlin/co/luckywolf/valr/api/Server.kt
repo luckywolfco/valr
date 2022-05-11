@@ -190,7 +190,7 @@ class ApiVerticle() : AbstractVerticle() {
 
           val limitOrderBook = tradeEngine.limitOrderBookBy(r.currentPair)
 
-          val result = tryExecuteOrderFor(
+          tryExecuteOrderFor(
             limitOrderBook,
             DataTypes.Order(
               r.side,
@@ -201,7 +201,9 @@ class ApiVerticle() : AbstractVerticle() {
               DataTypes.Trader(accountId, r.customerOrderId)
             )
           ).map {
-            rc.end()
+
+            rc.response().setStatusCode(200)
+              .end(JsonObject().put("id", it.orderId).toBuffer())
 
           }.mapLeft {
             rc.response()

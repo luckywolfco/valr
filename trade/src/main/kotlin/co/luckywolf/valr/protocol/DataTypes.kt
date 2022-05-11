@@ -107,7 +107,7 @@ object DataTypes {
 
   class Trade
 
-  class OrderExecuted(val orderId: OrderId)
+  class PlacedOrder(val orderId: OrderId)
 
   class Order(
     val side: Side,

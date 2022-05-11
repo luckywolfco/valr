@@ -7,26 +7,11 @@ import co.luckywolf.valr.protocol.DataTypes.zero
 import java.math.BigDecimal
 import java.time.Clock
 import java.util.*
-import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
-
-//object Customer {
-//  private val pattern = "a-zA-Z0-9".toRegex()
-//
-//  fun orderIdFor(
-//    account: String,
-//    orderId: String
-//  ): Either<DataTypes.ExchangeError.CustomerOrderIdTransformError, DataTypes.CustomerOrderId> {
-//    return when (orderId matches pattern) {
-//      true -> Either.Right(DataTypes.CustomerOrderId(account, orderId))
-//      else -> Either.Left(DataTypes.ExchangeError.CustomerOrderIdTransformError("$orderId is not alphanumeric"))
-//    }
-//  }
-//}
 
 object Trade {
 
-  val sequence: AtomicLong = AtomicLong(0L)
+  private val sequence: AtomicLong = AtomicLong(0L)
 
   class TradeEngine(private val books: MutableMap<DataTypes.CurrencyPair, LimitOrderBook> = mutableMapOf()) {
 
@@ -49,12 +34,10 @@ object Trade {
 
   fun addBidTo(book: LimitOrderBook, bid: DataTypes.Bid): DataTypes.Bid {
 
-    val bids = book.bids.getOrPut(bid.price) {
+    book.bids.getOrPut(bid.price) {
       mutableListOf()
-    }
-    if (bids.isEmpty()) {
-      bids.add(bid)
-    }
+    }.add(bid)
+
     return bid
   }
 
@@ -114,7 +97,6 @@ object Trade {
 
       when {
         bid.price < askPrice || quantityRequired == zero -> {
-          //done all the matching we could across the asks available
           return trades
         }
         n >= book.asks.size -> {
@@ -245,12 +227,18 @@ object Trade {
     return book.trades.take(limit)
   }
 
-  fun getBidsFor(book: LimitOrderBook, limit: Int): List<MutableMap.MutableEntry<BigDecimal, MutableList<DataTypes.Bid>>> {
+  fun getBidsFor(
+    book: LimitOrderBook,
+    limit: Int
+  ): List<MutableMap.MutableEntry<BigDecimal, MutableList<DataTypes.Bid>>> {
     return book.bids.entries.take(limit)
 
   }
 
-  fun getAsksFor(book: LimitOrderBook, limit: Int): List<MutableMap.MutableEntry<BigDecimal, MutableList<DataTypes.Ask>>> {
+  fun getAsksFor(
+    book: LimitOrderBook,
+    limit: Int
+  ): List<MutableMap.MutableEntry<BigDecimal, MutableList<DataTypes.Ask>>> {
     return book.asks.entries.take(limit)
   }
 
@@ -261,7 +249,7 @@ object Trade {
   fun tryExecuteOrderFor(
     book: LimitOrderBook,
     order: DataTypes.Order,
-  ): Either<DataTypes.ExchangeError, DataTypes.OrderExecuted> {
+  ): Either<DataTypes.ExchangeError, DataTypes.PlacedOrder> {
 
 
     return when (order.side) {
@@ -276,7 +264,7 @@ object Trade {
           val bid = DataTypes.Bid(
             bidId = DataTypes.OrderId(
               UUID.randomUUID().toString(),
-              Clock.systemUTC().millis()
+              sequence.incrementAndGet()
             ),
             quantity = order.quantity,
             price = order.price,
@@ -285,7 +273,9 @@ object Trade {
             account = order.account
           )
 
-          Either.Right(DataTypes.OrderExecuted(bid.bidId))
+          val trades: List<DataTypes.LimitOrderTrade> = matchBidToAsks(book, bid)
+          reshuffle(book, bid, trades)
+          Either.Right(DataTypes.PlacedOrder(bid.bidId))
 
         }.getOrElse {
           Either.Left(
@@ -309,7 +299,7 @@ object Trade {
           trader = order.account
         )
 
-        Either.Right(DataTypes.OrderExecuted(DataTypes.OrderId("", 9)))
+        Either.Right(DataTypes.PlacedOrder(DataTypes.OrderId("", 9)))
       }
     }
   }
