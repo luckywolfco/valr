@@ -71,7 +71,9 @@ object Trade {
       if (book.asks[trade.fillPrice]!!.isEmpty())
         book.asks.remove(trade.fillPrice)
 
+      //todo remove bid from book if filled
       getQuantityOutstanding(bid.quantity, trade.quantityMatches)
+
     }.sumOf { it }).filter { it > zero }.map {
       addBidTo(book, bid.copy(quantity = it))
     }.or(none())
