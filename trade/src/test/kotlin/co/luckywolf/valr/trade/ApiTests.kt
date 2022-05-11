@@ -1,12 +1,30 @@
 package co.luckywolf.valr.trade
 
 import co.luckywolf.valr.api.Crypto
+import co.luckywolf.valr.protocol.DataTypes
 import org.apache.commons.codec.binary.Hex
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 
 class ApiKeyTests {
+
+  @Test
+  fun generate_request() {
+    val hmac = Crypto.Hmac512.default()
+    val sign = hmac.sign(
+      apiKeySecret = "4961b74efac86b25cce8fbe4c9811c4c7a787b7a5996660afcc2e287ad864363".toByteArray(),
+      timestamp = "1560007630778",
+      verb = "GET",
+      path = "/v1/marketdata/BTCZAR/tradehistory"
+    )
+    println(
+      Hex.encodeHexString(sign)
+    )
+
+    val currencyPair = DataTypes.CurrencyPair.valueOf("BTCZAR")
+    println(currencyPair)
+  }
 
   @Test
   fun verify_request() {

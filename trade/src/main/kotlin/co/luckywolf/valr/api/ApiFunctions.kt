@@ -1,9 +1,6 @@
 package co.luckywolf.valr.api
 
-import arrow.core.Option
-import arrow.core.getOrElse
-import arrow.core.none
-import arrow.core.toOption
+import arrow.core.*
 import co.luckywolf.valr.protocol.ApiTypes
 
 object ApiFunctions {
@@ -41,6 +38,16 @@ object ApiFunctions {
       Option(it.apiPermission)
     }.getOrElse {
       none()
+    }
+  }
+
+  fun verifyUserPermissionsFor(userPermissions: List<ApiTypes.ApiPermission>, permission: ApiTypes.ApiPermission):
+    Either<ApiTypes.Validators.ApiError, Boolean> {
+
+    return if (userPermissions.contains(permission)) {
+      Either.Right(true)
+    } else {
+      Either.Left(ApiTypes.Validators.ApiError.InsufficientPermissions(permission.permission))
     }
   }
 }

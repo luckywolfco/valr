@@ -49,6 +49,17 @@ object ApiTypes {
     }
   }
 
+  class GetTradeHistoryApiRequest(val currencyPair: DataTypes.CurrencyPair, val skip: Int, val limit: Int) {
+    companion object {
+      fun   create(path: Map<String,String>, request: MultiMap): Either<Validators.ApiError, GetTradeHistoryApiRequest> {
+        val currencyPair = DataTypes.CurrencyPair.valueOf(path.getValue("currencyPair"))
+        val limit = request.get("limit").parseInt(0)
+        val skip = request.get("skip").parseInt(100)
+        return Either.Right(GetTradeHistoryApiRequest(currencyPair, skip, limit))
+      }
+    }
+  }
+
   enum class ApiPermission(val permission: String) {
     View("view"),
     Trade("trade"),
@@ -97,14 +108,17 @@ object ApiTypes {
     @SerializedName("SequenceNumber") val SequenceNumber: Long
   )
 
-
+  fun String.parseInt(default: Int): Int {
+    return toIntOrNull() ?: default
+  }
 
   object Validators {
 
-    sealed class ApiError(val msg: String) {
+    sealed class ApiError(val error: String) {
       data class DoesNotContain(val value: String) : ApiError("Missing $value value")
       data class MaxLength(val value: Int) : ApiError("Exceeded length of $value")
       data class NotAnEmail(val reasons: Nel<ApiError>) : ApiError("Not a valid email")
+      data class InsufficientPermissions(val value: String) : ApiError("Insufficient permissions to perform this action - required $value")
     }
   }
 }

@@ -7,6 +7,8 @@ import co.luckywolf.valr.protocol.DataTypes.zero
 import java.math.BigDecimal
 import java.time.Clock
 import java.util.*
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicLong
 
 //object Customer {
 //  private val pattern = "a-zA-Z0-9".toRegex()
@@ -23,6 +25,8 @@ import java.util.*
 //}
 
 object Trade {
+
+  val sequence: AtomicLong = AtomicLong(0L)
 
   class TradeEngine(private val books: MutableMap<DataTypes.CurrencyPair, LimitOrderBook> = mutableMapOf()) {
 
@@ -50,8 +54,6 @@ object Trade {
     }
     if (bids.isEmpty()) {
       bids.add(bid)
-    } else {
-      //update in place bid
     }
     return bid
   }
@@ -62,11 +64,8 @@ object Trade {
     }.add(ask)
   }
 
-//  fun getTopOfLineAsk(book: LimitOrderBook): Option<BigDecimal> {
-//    return if (book.asks.isEmpty()) none() else Option.fromNullable(book.asks.firstKey())
-//  }
 
-
+  //Try hold off state changes for as long as possible
   fun reshuffle(
     book: LimitOrderBook,
     bid: DataTypes.Bid,
@@ -82,10 +81,10 @@ object Trade {
       }
 
       trade.quantityMatches.filter { it.left == zero }.forEachIndexed { _, quantityMatch ->
-        println(quantityMatch)
         book.asks[trade.fillPrice]?.removeIf { it.askId.id == quantityMatch.id }
       }
-      if(book.asks[trade.fillPrice]!!.isEmpty())
+
+      if (book.asks[trade.fillPrice]!!.isEmpty())
         book.asks.remove(trade.fillPrice)
 
       getQuantityOutstanding(bid.quantity, trade.quantityMatches)
@@ -130,6 +129,7 @@ object Trade {
           trades.add(
             DataTypes.LimitOrderTrade(
               bid.bidId,
+              DataTypes.OrderId(sequence = sequence.incrementAndGet()),
               DataTypes.Side.BID,
               bid.price,
               bid.quantity,
@@ -213,24 +213,6 @@ object Trade {
 
   }
 
-
-  fun remove(
-    ask: MutableList<DataTypes.Ask>,
-    match: List<DataTypes.Match>
-  ): List<DataTypes.Ask> {
-
-    match.forEachIndexed { index, it ->
-      when (it.left) {
-        zero -> ask.removeAt(index)
-        else -> {
-          ask[index] = ask[index].copy(quantity = it.left)
-        }
-      }
-    }
-    return ask
-  }
-
-
   fun takeAvailableQuantityOnOffer(
     quantityRequired: BigDecimal,
     quantityAvailable: BigDecimal
@@ -256,6 +238,10 @@ object Trade {
   ): Boolean {
 
     return true
+  }
+
+  fun getTradesFor(book: LimitOrderBook, skip: Int, limit: Int): List<DataTypes.LimitOrderTrade> {
+    return book.trades.take(limit)
   }
 
   fun getBidsFor(book: LimitOrderBook): List<DataTypes.Bid> {

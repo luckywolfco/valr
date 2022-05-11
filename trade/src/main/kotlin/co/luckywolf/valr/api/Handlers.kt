@@ -1,9 +1,12 @@
 package co.luckywolf.valr.api
 
 import arrow.core.Option
+import arrow.core.getOrElse
 import arrow.core.none
+import arrow.core.orElse
 import co.luckywolf.valr.api.ApiFunctions.matchPathToPermissionRules
 import co.luckywolf.valr.api.ApiFunctions.matchPathToStartsWithMatchingRule
+import co.luckywolf.valr.api.ApiFunctions.verifyUserPermissionsFor
 import co.luckywolf.valr.protocol.ApiTypes
 import co.luckywolf.valr.protocol.DataTypes
 import io.vertx.core.Handler
@@ -18,17 +21,22 @@ class ApiPermissionAuthorizationHandler(val accountPermissionService: (String) -
   Handler<RoutingContext> {
   override fun handle(rc: RoutingContext) {
 
-    val accountPermissions = accountPermissionService(rc.user().getAccountId())
+    val accountPermissions: List<ApiTypes.ApiPermission> = accountPermissionService(rc.user().getAccountId())
+
+
 
     matchPathToPermissionRules(
       path = rc.request().path(),
       matchingStrategy = matchPathToStartsWithMatchingRule
-    ).map {
-      accountPermissions.contains(it)
+    ).map { p ->
+      verifyUserPermissionsFor(accountPermissions, p).map {
+        rc.next()
+      }.mapLeft {
+        rc.response().setStatusCode(400).end(JsonObject().put("error", "insufficient permissions").toBuffer())
+      }
+    }.getOrElse {
+      rc.response().setStatusCode(400).end(JsonObject().put("error", "unknown permission rule").toBuffer())
     }
-    //test permissions match
-
-
   }
 
 }
@@ -75,17 +83,16 @@ class ApiKeyAuthenticationHandler(private val accounts: () -> Map<String, DataTy
               rc.next()
             }
             else -> {
-              response.end("")
+              response.setStatusCode(400).end(JsonObject().put("error", "invalid signature").toBuffer())
             }
           }
         }
         else -> {
-          response.end("")
+          response.setStatusCode(400).end(JsonObject().put("error", "unknown api key").toBuffer())
         }
       }
-    }.mapLeft {
-      //validation errors
-      response.end("")
+    }.mapLeft { err ->
+      response.setStatusCode(400).end(JsonObject().put("error", err.extract().error).toBuffer())
     }
   }
 }

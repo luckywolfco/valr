@@ -5,6 +5,7 @@ import arrow.core.none
 import java.math.BigDecimal
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
+import java.time.Clock
 import java.util.*
 
 
@@ -19,12 +20,14 @@ object DataTypes {
 
   data class LimitOrderTrade(
     val orderId: OrderId,
+    val tradeId: OrderId,
     val tradeSide: Side,
     val price: BigDecimal,
     val quantity: BigDecimal,
     val fillSide: Side,
     val fillPrice: BigDecimal,
-    val quantityMatches: List<QuantityMatch>
+    val quantityMatches: List<QuantityMatch>,
+    val timestamp: Long = Clock.systemUTC().millis(),
   )
 
   class QuantityTaken(
@@ -40,9 +43,9 @@ object DataTypes {
   //Have to make state mutable
   class LimitOrderBook(
     val currencyPair: CurrencyPair,
-    //val askPriceIndex: MutableMap<Int,BigDecimal> = mutableMapOf(),
     val bids: TreeMap<BigDecimal, MutableList<Bid>> = TreeMap(HighLowPriceComparator()),
     val asks: TreeMap<BigDecimal, MutableList<Ask>> = TreeMap(LowHighPriceComparator()),
+    val trades: List<LimitOrderTrade> = listOf()
   ) {
     init {
     }
@@ -124,7 +127,7 @@ object DataTypes {
     val price: BigDecimal,
     val currencyPair: CurrencyPair,
     val timeInForce: TimeInForce = TimeInForce.GTC,
-    val timestamp: Long = System.nanoTime(),
+    val timestamp: Long = Clock.systemUTC().millis(),
     val account: Trader,
     val postOnly: Boolean = false
   )
@@ -137,7 +140,7 @@ object DataTypes {
     val price: BigDecimal,
     val currencyPair: CurrencyPair,
     val timeInForce: TimeInForce = TimeInForce.GTC,
-    val timestamp: Long = System.nanoTime(),
+    val timestamp: Long = Clock.systemUTC().millis(),
     val trader: Trader,
     val postOnly: Boolean = false
   )
