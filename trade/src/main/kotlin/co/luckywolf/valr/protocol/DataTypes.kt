@@ -45,11 +45,8 @@ object DataTypes {
     val currencyPair: CurrencyPair,
     val bids: TreeMap<BigDecimal, MutableList<Bid>> = TreeMap(HighLowPriceComparator()),
     val asks: TreeMap<BigDecimal, MutableList<Ask>> = TreeMap(LowHighPriceComparator()),
-    val trades: List<LimitOrderTrade> = listOf()
-  ) {
-    init {
-    }
-  }
+    val trades: MutableList<LimitOrderTrade> = mutableListOf()
+  )
 
   class HighLowPriceComparator : Comparator<BigDecimal> {
     override fun compare(left: BigDecimal, right: BigDecimal): Int {
@@ -105,10 +102,6 @@ object DataTypes {
     val apiSecret: ByteArray,
   )
 
-  class Trade
-
-  class PlacedOrder(val orderId: OrderId)
-
   class Order(
     val side: Side,
     val quantity: BigDecimal,
@@ -135,7 +128,7 @@ object DataTypes {
   class AskId(val id: String = UUID.randomUUID().toString(), val sequence: Long)
 
   data class Ask(
-    val askId: AskId,
+    val askId: OrderId,
     val quantity: BigDecimal,
     val price: BigDecimal,
     val currencyPair: CurrencyPair,
