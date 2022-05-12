@@ -1,12 +1,10 @@
 package co.luckywolf.valr.api
 
-import arrow.core.getOrElse
-import arrow.core.orElse
 import co.luckywolf.valr.exchange.Trade
 import co.luckywolf.valr.exchange.Trade.getAsksFor
 import co.luckywolf.valr.exchange.Trade.getBidsFor
 import co.luckywolf.valr.exchange.Trade.getTradesFor
-import co.luckywolf.valr.exchange.Trade.tryExecuteOrderFor
+import co.luckywolf.valr.exchange.Trade.tryPlaceOrderFor
 import co.luckywolf.valr.protocol.ApiTypes
 import co.luckywolf.valr.protocol.DataTypes
 import io.vertx.core.AbstractVerticle
@@ -99,24 +97,24 @@ class ApiVerticle() : AbstractVerticle() {
 
           val limitOrderBook = tradeEngine.limitOrderBookBy(r.currencyPair)
 
-          val asks = getAsksFor(limitOrderBook, r.limit).map { trade ->
-            trade.value.sumOf { a -> a.quantity }
+          val asks = getAsksFor(limitOrderBook, r.limit).map { ask ->
+            ask.value.sumOf { a -> a.quantity }
             JsonObject()
               .put("side", DataTypes.Side.ASK.name)
-              .put("quantity", trade.value.sumOf { a -> a.quantity }.toString())
-              .put("price", trade.key.toString())
+              .put("quantity", ask.value.sumOf { a -> a.quantity }.toString())
+              .put("price", ask.key.toString())
               .put("currencyPair", r.currencyPair.name.uppercase())
-              .put("orderCount", trade.value.size)
+              .put("orderCount", ask.value.size)
           }
 
-          val bids = getBidsFor(limitOrderBook, r.limit).map { trade ->
-            trade.value.sumOf { a -> a.quantity }
+          val bids = getBidsFor(limitOrderBook, r.limit).map { bid ->
+            bid.value.sumOf { a -> a.quantity }
             JsonObject()
               .put("side", DataTypes.Side.BID.name)
-              .put("quantity", trade.value.sumOf { a -> a.quantity }.toString())
-              .put("price", trade.key.toString())
+              .put("quantity", bid.value.sumOf { a -> a.quantity }.toString())
+              .put("price", bid.key.toString())
               .put("currencyPair", r.currencyPair.name.uppercase())
-              .put("orderCount", trade.value.size)
+              .put("orderCount", bid.value.size)
           }
 
           it.response()
@@ -189,7 +187,7 @@ class ApiVerticle() : AbstractVerticle() {
 
           val limitOrderBook = tradeEngine.limitOrderBookBy(r.currentPair)
 
-          tryExecuteOrderFor(
+          tryPlaceOrderFor(
             limitOrderBook,
             DataTypes.Order(
               r.side,

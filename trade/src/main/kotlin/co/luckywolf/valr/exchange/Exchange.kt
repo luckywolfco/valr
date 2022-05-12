@@ -21,14 +21,35 @@ object Trade {
     }
   }
 
-  fun printBook(book: LimitOrderBook) {
-    book.bids.forEach { t, u ->
-      println("Price: $t")
+  fun printBookToConsole(book: LimitOrderBook) {
+    println("------------------------------Book-----------------------------")
+    printBook(book, { p, b -> println(b) },
+      { p, a -> println(a) },
+      { t -> println(t) })
+  }
+
+  fun printBook(
+    book: LimitOrderBook,
+    bid: (BigDecimal, DataTypes.Bid) -> Unit,
+    ask: (BigDecimal, DataTypes.Ask) -> Unit,
+    trade: (DataTypes.LimitOrderTrade) -> Unit
+  ) {
+    book.bids.forEach { (t, u) ->
       u.forEach {
-        println("Qty: ${it.quantity}")
+        bid(t, it)
       }
-      println()
     }
+
+    book.asks.forEach { (t, u) ->
+      u.forEach {
+        ask(t, it)
+      }
+    }
+
+    book.trades.forEach {
+      trade(it)
+    }
+
   }
 
   fun addBidTo(book: LimitOrderBook, bid: DataTypes.Bid): DataTypes.Bid {
@@ -97,7 +118,8 @@ object Trade {
 
     }.sumOf { it }).map {
       when {
-        it == zero && matches.isNotEmpty() -> {
+        (bid.quantity - it) == zero && matches.isNotEmpty()
+          && matches.flatMap { qm -> qm.quantityMatches }.isNotEmpty() -> {
           removeBidFrom(book, bid)
         }
         matches.isEmpty() -> {
@@ -156,6 +178,9 @@ object Trade {
 
     val trades = mutableListOf<DataTypes.LimitOrderMatch>()
 
+    if (book.asks.isEmpty())
+      return trades
+
     fun match(
       n: Int,
       askPrice: BigDecimal,
@@ -175,7 +200,7 @@ object Trade {
         }
         else -> {
           val quantityMatches =
-            matchBidQuantityToAskQuantities(bid, asks)
+            matchBidQuantityToAskQuantities(quantityRequired, asks)
 
           val quantityOutstanding =
             getQuantityOutstanding(quantityRequired, quantityMatches)
@@ -297,7 +322,7 @@ object Trade {
 
   //match the bid to a single ask
   fun matchBidQuantityToAskQuantities(
-    bid: DataTypes.Bid,
+    quantityRequired: BigDecimal,
     asks: List<DataTypes.Ask>,
   ): List<DataTypes.QuantityMatch> {
 
@@ -330,7 +355,7 @@ object Trade {
         }
       }
     }
-    return match(0, bid.quantity)
+    return match(0, quantityRequired)
   }
 
   fun matchAskQuantityToBidQuantities(
@@ -420,7 +445,7 @@ object Trade {
     The customerOrderId has to be unique across all open orders for a given account. If you do reuse an id value
     that is currently an active open order, your order will not be placed (you can check the status of an order using the order status API call).
    */
-  fun tryExecuteOrderFor(
+  fun tryPlaceOrderFor(
     book: LimitOrderBook,
     order: DataTypes.Order,
   ): Either<DataTypes.ExchangeError, DataTypes.OrderId> {

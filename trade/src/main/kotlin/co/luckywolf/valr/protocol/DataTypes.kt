@@ -149,7 +149,7 @@ object DataTypes {
     val postOnly: Boolean = false
   )
 
-  class Trader(
+  data class Trader(
     val accountId: String,
     val customOrderReferenceId: Option<String> = none()
   )
