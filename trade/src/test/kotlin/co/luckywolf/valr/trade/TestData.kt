@@ -28,7 +28,7 @@ object TestData {
   )
 
   val ask_10_at_R20 = DataTypes.Ask(
-    DataTypes.AskId(sequence = 1),
+    DataTypes.OrderId(sequence = 1),
     BigDecimal(10),
     price = BigDecimal(20),
     DataTypes.CurrencyPair.BTCZAR,
@@ -36,7 +36,7 @@ object TestData {
   )
 
   val ask_22_at_R22 = DataTypes.Ask(
-    DataTypes.AskId(sequence = 1),
+    DataTypes.OrderId(sequence = 1),
     BigDecimal(22),
     price = BigDecimal(22),
     DataTypes.CurrencyPair.BTCZAR,
@@ -44,7 +44,7 @@ object TestData {
   )
 
   val ask_30_R20 = DataTypes.Ask(
-    DataTypes.AskId(sequence = 2),
+    DataTypes.OrderId(sequence = 1),
     BigDecimal(30),
     price = BigDecimal(20),
     DataTypes.CurrencyPair.BTCZAR,
@@ -52,7 +52,7 @@ object TestData {
   )
 
   val ask_7_R20 = DataTypes.Ask(
-    DataTypes.AskId(sequence = 2),
+    DataTypes.OrderId(sequence = 1),
     BigDecimal(7),
     price = BigDecimal(20),
     DataTypes.CurrencyPair.BTCZAR,
@@ -60,7 +60,7 @@ object TestData {
   )
 
   val ask_200_at_20 = DataTypes.Ask(
-    DataTypes.AskId(sequence = 1),
+    DataTypes.OrderId(sequence = 1),
     BigDecimal(200),
     price = BigDecimal(20),
     DataTypes.CurrencyPair.BTCZAR,

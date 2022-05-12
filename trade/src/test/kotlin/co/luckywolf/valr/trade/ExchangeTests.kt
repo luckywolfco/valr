@@ -10,8 +10,6 @@ import co.luckywolf.valr.protocol.DataTypes.zero
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
-import java.util.Collections.shuffle
-import java.util.Collections.sort
 
 class ExchangeTests {
 
@@ -94,9 +92,9 @@ class ExchangeTests {
       book,
       TestData.bid_49_at_R30,
       listOf(
-        DataTypes.LimitOrderTrade(
+        DataTypes.LimitOrderMatch(
           DataTypes.OrderId(sequence = 9),
-          DataTypes.Side.BID,
+          tradeSide = DataTypes.Side.BID,
           price = 30.toBigDecimal(),
           quantity = 49.toBigDecimal(),
           fillSide = DataTypes.Side.ASK,
@@ -114,6 +112,10 @@ class ExchangeTests {
 
     book.bids.forEach { t, u: MutableList<DataTypes.Bid> ->
       u.forEach { println(it) }
+    }
+
+    book.trades.forEach {
+      println(it)
     }
   }
 
@@ -159,21 +161,21 @@ class ExchangeTests {
     )
 
     val ask1 = DataTypes.Ask(
-      DataTypes.AskId(sequence = 1),
+      DataTypes.OrderId(sequence = 1),
       BigDecimal(300),
       price = BigDecimal(500),
       DataTypes.CurrencyPair.BTCZAR,
       trader = DataTypes.Trader("tag")
     )
     val ask2 = DataTypes.Ask(
-      DataTypes.AskId(sequence = 2),
+      DataTypes.OrderId(sequence = 2),
       BigDecimal(300),
       price = BigDecimal(299),
       DataTypes.CurrencyPair.BTCZAR,
       trader = DataTypes.Trader("tag2")
     )
     val ask3 = DataTypes.Ask(
-      DataTypes.AskId(sequence = 3),
+      DataTypes.OrderId(sequence = 3),
       BigDecimal(300),
       price = BigDecimal(299),
       DataTypes.CurrencyPair.BTCZAR,

@@ -26,6 +26,17 @@ object DataTypes {
     val quantity: BigDecimal,
     val fillSide: Side,
     val fillPrice: BigDecimal,
+    val fillQuantity: QuantityMatch,
+    val timestamp: Long = Clock.systemUTC().millis(),
+  )
+
+  data class LimitOrderMatch(
+    val orderId: OrderId,
+    val tradeSide: Side,
+    val price: BigDecimal,
+    val quantity: BigDecimal,
+    val fillSide: Side,
+    val fillPrice: BigDecimal,
     val quantityMatches: List<QuantityMatch>,
     val timestamp: Long = Clock.systemUTC().millis(),
   )

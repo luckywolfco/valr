@@ -6,8 +6,6 @@ import co.luckywolf.valr.protocol.DataTypes
 import co.luckywolf.valr.protocol.DataTypes.LimitOrderBook
 import co.luckywolf.valr.protocol.DataTypes.zero
 import java.math.BigDecimal
-import java.time.Clock
-import java.util.*
 import java.util.concurrent.atomic.AtomicLong
 
 object Trade {
@@ -59,38 +57,50 @@ object Trade {
   fun reshuffle(
     book: LimitOrderBook,
     bid: DataTypes.Bid,
-    trades: List<DataTypes.LimitOrderTrade>
-  ): List<DataTypes.LimitOrderTrade> {
+    matches: List<DataTypes.LimitOrderMatch>
+  ): List<DataTypes.LimitOrderMatch> {
 
-    Some(trades.filter { it.tradeSide == DataTypes.Side.BID }.map { trade ->
+    Some(matches.filter { it.tradeSide == DataTypes.Side.BID }.map { match ->
 
-      trade.quantityMatches.filter { it.left > zero }.forEach { quantityMatch ->
-        val price = fromNullable(book.asks[trade.fillPrice]?.get(quantityMatch.index))
+      //each match is effectively a trade
+      book.trades.addAll(match.quantityMatches.map {
+        DataTypes.LimitOrderTrade(
+          orderId = bid.bidId,
+          tradeId = DataTypes.OrderId(sequence = sequence.incrementAndGet()),
+          tradeSide = DataTypes.Side.BID,
+          price = bid.price,
+          quantity = bid.quantity,
+          fillSide = DataTypes.Side.ASK,
+          fillPrice = match.fillPrice,
+          fillQuantity = it
+        )
+      })
+
+      match.quantityMatches.filter { it.left > zero }.forEach { quantityMatch ->
+        val price = fromNullable(book.asks[match.fillPrice]?.get(quantityMatch.index))
         price.map {
-          book.asks[trade.fillPrice]?.set(quantityMatch.index, it.copy(quantity = quantityMatch.left))
+          book.asks[match.fillPrice]?.set(quantityMatch.index, it.copy(quantity = quantityMatch.left))
         }
       }
 
-      trade.quantityMatches.filter { it.left == zero }.forEachIndexed { _, quantityMatch ->
-        book.asks[trade.fillPrice]?.removeIf { it.askId.id == quantityMatch.id }
+      match.quantityMatches.filter { it.left == zero }.forEachIndexed { _, quantityMatch ->
+        book.asks[match.fillPrice]?.removeIf { it.askId.id == quantityMatch.id }
       }
 
       //if all asks for that price has been filled remove the price entirely
-      fromNullable(book.asks[trade.fillPrice]).map {
+      fromNullable(book.asks[match.fillPrice]).map {
         if (it.isEmpty())
-          book.asks.remove(trade.fillPrice)
+          book.asks.remove(match.fillPrice)
       }
 
-      book.trades.add(trade)
-
-      getQuantityOutstanding(bid.quantity, trade.quantityMatches)
+      getQuantityOutstanding(bid.quantity, match.quantityMatches)
 
     }.sumOf { it }).map {
       when {
-        it == zero && trades.isNotEmpty() -> {
+        it == zero && matches.isNotEmpty() -> {
           removeBidFrom(book, bid)
         }
-        trades.isEmpty() -> {
+        matches.isEmpty() -> {
           addBidTo(book, bid)
         }
         else -> {
@@ -98,14 +108,14 @@ object Trade {
         }
       }
     }
-    return trades
+    return matches
   }
 
 
   fun reshuffle(
     book: LimitOrderBook,
     ask: DataTypes.Ask,
-    trades: List<DataTypes.LimitOrderTrade>
+    trades: List<DataTypes.LimitOrderMatch>
   ): Option<DataTypes.Ask> {
 
     return Some(trades.filter { it.tradeSide == DataTypes.Side.ASK }.map { trade ->
@@ -142,16 +152,16 @@ object Trade {
   fun matchBidToAsks(
     book: LimitOrderBook,
     bid: DataTypes.Bid,
-  ): List<DataTypes.LimitOrderTrade> {
+  ): List<DataTypes.LimitOrderMatch> {
 
-    val trades = mutableListOf<DataTypes.LimitOrderTrade>()
+    val trades = mutableListOf<DataTypes.LimitOrderMatch>()
 
     fun match(
       n: Int,
       askPrice: BigDecimal,
       asks: List<DataTypes.Ask>,
       quantityRequired: BigDecimal
-    ): List<DataTypes.LimitOrderTrade> {
+    ): List<DataTypes.LimitOrderMatch> {
 
       when {
         book.asks.isEmpty() -> {
@@ -171,15 +181,14 @@ object Trade {
             getQuantityOutstanding(quantityRequired, quantityMatches)
 
           trades.add(
-            DataTypes.LimitOrderTrade(
-              bid.bidId,
-              DataTypes.OrderId(sequence = sequence.incrementAndGet()),
-              DataTypes.Side.BID,
-              bid.price,
-              bid.quantity,
-              DataTypes.Side.ASK,
-              askPrice,
-              quantityMatches
+            DataTypes.LimitOrderMatch(
+              orderId = bid.bidId,
+              tradeSide = DataTypes.Side.BID,
+              price = bid.price,
+              quantity = bid.quantity,
+              fillSide = DataTypes.Side.ASK,
+              fillPrice = askPrice,
+              quantityMatches = quantityMatches
             )
           )
 
@@ -213,9 +222,9 @@ object Trade {
   fun matchAskToBids(
     book: LimitOrderBook,
     ask: DataTypes.Ask,
-  ): List<DataTypes.LimitOrderTrade> {
+  ): List<DataTypes.LimitOrderMatch> {
 
-    val trades = mutableListOf<DataTypes.LimitOrderTrade>()
+    val trades = mutableListOf<DataTypes.LimitOrderMatch>()
 
     if (book.bids.isEmpty())
       return trades
@@ -225,7 +234,7 @@ object Trade {
       bidPrice: BigDecimal,
       bids: List<DataTypes.Bid>,
       quantityRequired: BigDecimal
-    ): List<DataTypes.LimitOrderTrade> {
+    ): List<DataTypes.LimitOrderMatch> {
 
       when {
         ask.price > bidPrice || quantityRequired == zero -> {
@@ -242,9 +251,8 @@ object Trade {
             getQuantityOutstanding(quantityRequired, quantityMatches)
 
           trades.add(
-            DataTypes.LimitOrderTrade(
+            DataTypes.LimitOrderMatch(
               ask.askId,
-              DataTypes.OrderId(sequence = sequence.incrementAndGet()),
               DataTypes.Side.ASK,
               ask.price,
               ask.quantity,

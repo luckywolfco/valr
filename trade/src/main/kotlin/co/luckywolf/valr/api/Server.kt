@@ -142,19 +142,18 @@ class ApiVerticle() : AbstractVerticle() {
         ApiTypes.GetTradeHistoryApiRequest.create(it.pathParams(), it.request().params()).map { r ->
 
           val limitOrderBook = tradeEngine.limitOrderBookBy(r.currencyPair)
-          val trades: List<JsonObject> = getTradesFor(limitOrderBook, r.skip, r.limit).flatMap { trade ->
-            trade.quantityMatches.map { qm ->
-              JsonObject()
-                .put("price", trade.fillPrice.toString())
-                .put("quantity", qm.taken.toString())
-                .put("currencyPair", r.currencyPair.toString().uppercase())
-                .put("tradedAt", DateTime(trade.timestamp.toString()))
-                .put("takerSide", trade.fillSide.toString().lowercase())
-                .put("sequenceId", trade.tradeId.sequence.toString())
-                .put("id", trade.tradeId.id)
-                .put("quoteVolume", trade.quantity.toString())
-            }
+          val trades: List<JsonObject> = getTradesFor(limitOrderBook, r.skip, r.limit).map { trade ->
+            JsonObject()
+              .put("price", trade.fillPrice.toString())
+              .put("quantity", trade.fillQuantity.toString())
+              .put("currencyPair", r.currencyPair.toString().uppercase())
+              .put("tradedAt", DateTime(trade.timestamp.toString()))
+              .put("takerSide", trade.fillSide.toString().lowercase())
+              .put("sequenceId", trade.tradeId.sequence.toString())
+              .put("id", trade.tradeId.id)
+              .put("quoteVolume", trade.quantity.toString())
           }
+
           it.response()
             .setStatusCode(200)
             .end(JsonArray(trades).toBuffer())
@@ -203,7 +202,7 @@ class ApiVerticle() : AbstractVerticle() {
           ).map {
 
             rc.response().setStatusCode(200)
-              .end(JsonObject().put("id", it.orderId).toBuffer())
+              .end(JsonObject().put("id", it.id).toBuffer())
 
           }.mapLeft {
             rc.response()
