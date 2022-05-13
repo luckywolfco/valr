@@ -22,7 +22,7 @@ object Trade {
   }
 
   fun printBookToConsole(book: LimitOrderBook) {
-    println("------------------------------Book-----------------------------")
+    println("------------------------------Book-----------------------------d")
     printBook(book, { p, b -> println(b) },
       { p, a -> println(a) },
       { t -> println(t) })
@@ -63,6 +63,10 @@ object Trade {
 
   fun removeBidFrom(book: LimitOrderBook, bid: DataTypes.Bid): Option<MutableList<DataTypes.Bid>> {
     return fromNullable(book.bids.remove(bid.price))
+  }
+
+  fun removeAskFrom(book: LimitOrderBook, ask: DataTypes.Ask): Option<MutableList<DataTypes.Ask>> {
+    return fromNullable(book.asks.remove(ask.price))
   }
 
   fun addAskTo(book: LimitOrderBook, ask: DataTypes.Ask): DataTypes.Ask {
@@ -118,13 +122,16 @@ object Trade {
 
     }.sumOf { it }).map {
       when {
+        //fully filled with trades and matches then remove
         (bid.quantity - it) == zero && matches.isNotEmpty()
           && matches.flatMap { qm -> qm.quantityMatches }.isNotEmpty() -> {
           removeBidFrom(book, bid)
         }
+        //no matches just add to book
         matches.isEmpty() -> {
           addBidTo(book, bid)
         }
+        //matches but only partially filled
         else -> {
           addBidTo(book, bid.copy(quantity = it))
         }
@@ -137,37 +144,61 @@ object Trade {
   fun reshuffle(
     book: LimitOrderBook,
     ask: DataTypes.Ask,
-    trades: List<DataTypes.LimitOrderMatch>
-  ): Option<DataTypes.Ask> {
+    matches: List<DataTypes.LimitOrderMatch>
+  ): List<DataTypes.LimitOrderMatch> {
+    Some(matches.filter { it.tradeSide == DataTypes.Side.ASK }.map { match ->
 
-    return Some(trades.filter { it.tradeSide == DataTypes.Side.ASK }.map { trade ->
+      //each match is effectively a trade
+      book.trades.addAll(match.quantityMatches.map {
+        DataTypes.LimitOrderTrade(
+          orderId = ask.askId,
+          tradeId = DataTypes.OrderId(sequence = sequence.incrementAndGet()),
+          tradeSide = DataTypes.Side.ASK,
+          price = ask.price,
+          quantity = ask.quantity,
+          fillSide = DataTypes.Side.ASK,
+          fillPrice = match.fillPrice,
+          fillQuantity = it
+        )
+      })
 
-      //update ask with partially filled bids
-      trade.quantityMatches.filter { it.left > zero }.forEach { quantityMatch ->
-        val price = fromNullable(book.bids[trade.fillPrice]?.get(quantityMatch.index))
+      match.quantityMatches.filter { it.left > zero }.forEach { quantityMatch ->
+        val price = fromNullable(book.bids[match.fillPrice]?.get(quantityMatch.index))
         price.map {
-          book.bids[trade.fillPrice]?.set(quantityMatch.index, it.copy(quantity = quantityMatch.left))
+          book.bids[match.fillPrice]?.set(quantityMatch.index, it.copy(quantity = quantityMatch.left))
         }
       }
 
-      trade.quantityMatches.filter { it.left == zero }.forEachIndexed { _, quantityMatch ->
-        book.asks[trade.fillPrice]?.removeIf { it.askId.id == quantityMatch.id }
+      match.quantityMatches.filter { it.left == zero }.forEachIndexed { _, quantityMatch ->
+        book.bids[match.fillPrice]?.removeIf { it.bidId.id == quantityMatch.id }
       }
 
       //if all asks for that price has been filled remove the price entirely
-      fromNullable(book.asks[trade.fillPrice]).map {
+      fromNullable(book.bids[match.fillPrice]).map {
         if (it.isEmpty())
-          book.asks.remove(trade.fillPrice)
+          book.bids.remove(match.fillPrice)
       }
 
-      getQuantityOutstanding(ask.quantity, trade.quantityMatches)
+      getQuantityOutstanding(ask.quantity, match.quantityMatches)
 
     }.sumOf { it }).map {
-      if (it == zero)
-        addAskTo(book, ask)
-      else
-        addAskTo(book, ask.copy(quantity = it))
+      when {
+        //fully filled with trades and matches then remove
+        (ask.quantity - it) == zero && matches.isNotEmpty()
+          && matches.flatMap { qm -> qm.quantityMatches }.isNotEmpty() -> {
+          removeAskFrom(book, ask)
+        }
+        //no matches just add to book
+        matches.isEmpty() -> {
+          addAskTo(book, ask)
+        }
+        //matches but only partially filled
+        else -> {
+          addAskTo(book, ask.copy(quantity = it))
+        }
+      }
     }
+    return matches
   }
 
 
@@ -281,7 +312,7 @@ object Trade {
               DataTypes.Side.ASK,
               ask.price,
               ask.quantity,
-              DataTypes.Side.ASK,
+              DataTypes.Side.BID,
               bidPrice,
               quantityMatches
             )

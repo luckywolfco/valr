@@ -8,6 +8,22 @@ import co.luckywolf.valr.exchange.Trade.printBookToConsole
 import co.luckywolf.valr.exchange.Trade.reshuffle
 import co.luckywolf.valr.protocol.DataTypes
 import co.luckywolf.valr.protocol.DataTypes.zero
+import co.luckywolf.valr.trade.TestData.ask_10_at_R20
+import co.luckywolf.valr.trade.TestData.ask_200_at_20
+import co.luckywolf.valr.trade.TestData.ask_22_at_R22
+import co.luckywolf.valr.trade.TestData.ask_2_at_R7
+import co.luckywolf.valr.trade.TestData.ask_30_R20
+import co.luckywolf.valr.trade.TestData.ask_3_R8
+import co.luckywolf.valr.trade.TestData.ask_3_R89
+import co.luckywolf.valr.trade.TestData.ask_5_R5
+import co.luckywolf.valr.trade.TestData.ask_5_at_R90
+import co.luckywolf.valr.trade.TestData.ask_7_R20
+import co.luckywolf.valr.trade.TestData.bid_10_at_R10
+import co.luckywolf.valr.trade.TestData.bid_10_at_R5
+import co.luckywolf.valr.trade.TestData.bid_29_at_R26
+import co.luckywolf.valr.trade.TestData.bid_3_at_R5
+import co.luckywolf.valr.trade.TestData.bid_49_at_R30
+import co.luckywolf.valr.trade.TestData.bid_50_at_R100
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
@@ -37,11 +53,11 @@ class BidTests {
 
     val matches_a: List<DataTypes.QuantityMatch> =
       matchBidQuantityToAskQuantities(
-        TestData.bid_50_at_R100.quantity,
+        bid_50_at_R100.quantity,
         listOf(
-          TestData.ask_10_at_R20,
-          TestData.ask_7_R20,
-          TestData.ask_200_at_20
+          ask_10_at_R20,
+          ask_7_R20,
+          ask_200_at_20
         )
       )
 
@@ -60,15 +76,15 @@ class BidTests {
     Assertions.assertEquals(matches_a[2].index, 2)
 
     Assertions.assertEquals(
-      getQuantityOutstanding(TestData.bid_50_at_R100.quantity, matches_a), zero
+      getQuantityOutstanding(bid_50_at_R100.quantity, matches_a), zero
     )
 
     val matches_b: List<DataTypes.QuantityMatch> =
       matchBidQuantityToAskQuantities(
-        TestData.bid_10_at_R10.quantity,
+        bid_10_at_R10.quantity,
         listOf(
-          TestData.ask_10_at_R20,
-          TestData.ask_7_R20,
+          ask_10_at_R20,
+          ask_7_R20,
         )
       )
 
@@ -77,15 +93,15 @@ class BidTests {
     Assertions.assertEquals(matches_b[0].index, 0)
 
     Assertions.assertEquals(
-      getQuantityOutstanding(TestData.bid_10_at_R10.quantity, matches_b), zero
+      getQuantityOutstanding(bid_10_at_R10.quantity, matches_b), zero
     )
 
     val matches_c: List<DataTypes.QuantityMatch> =
       matchBidQuantityToAskQuantities(
-        TestData.bid_10_at_R10.quantity,
+        bid_10_at_R10.quantity,
         listOf(
-          TestData.ask_2_at_R7,
-          TestData.ask_2_at_R7,
+          ask_2_at_R7,
+          ask_2_at_R7,
         )
       )
 
@@ -98,7 +114,7 @@ class BidTests {
     Assertions.assertEquals(matches_c[0].index, 0)
 
     Assertions.assertEquals(
-      getQuantityOutstanding(TestData.bid_10_at_R10.quantity, matches_c), 6.toBigDecimal()
+      getQuantityOutstanding(bid_10_at_R10.quantity, matches_c), 6.toBigDecimal()
     )
 
   }
@@ -106,11 +122,11 @@ class BidTests {
   @Test
   fun add_bid_shuffle() {
     val book = DataTypes.LimitOrderBook(DataTypes.CurrencyPair.BTCZAR)
-    book.asks[TestData.ask_7_R20.price] = mutableListOf(TestData.ask_7_R20, TestData.ask_30_R20) //37
+    book.asks[ask_7_R20.price] = mutableListOf(ask_7_R20, ask_30_R20) //37
 
     reshuffle(
       book,
-      TestData.bid_49_at_R30.copy(bidId = DataTypes.OrderId(id = "liverpool", sequence = 9)),
+      bid_49_at_R30.copy(bidId = DataTypes.OrderId(id = "liverpool", sequence = 9)),
       listOf(
         DataTypes.LimitOrderMatch(
           DataTypes.OrderId(id = "liverpool", sequence = 9),
@@ -120,8 +136,8 @@ class BidTests {
           fillSide = DataTypes.Side.ASK,
           fillPrice = 20.toBigDecimal(),
           quantityMatches = listOf(
-            DataTypes.QuantityMatch(TestData.ask_7_R20.askId.id, 0, 7.toBigDecimal(), 0.toBigDecimal()),
-            DataTypes.QuantityMatch(TestData.ask_30_R20.askId.id, 1, 30.toBigDecimal(), 0.toBigDecimal())
+            DataTypes.QuantityMatch(ask_7_R20.askId.id, 0, 7.toBigDecimal(), 0.toBigDecimal()),
+            DataTypes.QuantityMatch(ask_30_R20.askId.id, 1, 30.toBigDecimal(), 0.toBigDecimal())
           )
         )
       )
@@ -131,8 +147,8 @@ class BidTests {
     Assertions.assertEquals(2, book.trades.size)
     Assertions.assertEquals(0, book.asks.size)
 
-    Assertions.assertEquals(12.toBigDecimal(), book.bids[TestData.bid_49_at_R30.price]!![0].quantity)
-    Assertions.assertEquals("liverpool", book.bids[TestData.bid_49_at_R30.price]!![0].bidId.id)
+    Assertions.assertEquals(12.toBigDecimal(), book.bids[bid_49_at_R30.price]!![0].quantity)
+    Assertions.assertEquals("liverpool", book.bids[bid_49_at_R30.price]!![0].bidId.id)
     Assertions.assertEquals("liverpool", book.trades[0].orderId.id)
     Assertions.assertEquals("liverpool", book.trades[1].orderId.id)
 
@@ -141,21 +157,50 @@ class BidTests {
 
   @Test
   fun update_bid_shuffle() {
+    val book = DataTypes.LimitOrderBook(DataTypes.CurrencyPair.BTCZAR)
+    book.asks[ask_3_R8.price] = mutableListOf(ask_3_R8) //37
+    book.asks[ask_3_R89.price] = mutableListOf(ask_3_R89) //37
+    book.bids[bid_3_at_R5.price] = mutableListOf(bid_3_at_R5)
 
+    reshuffle(
+      book,
+      bid_10_at_R10.copy(bidId = DataTypes.OrderId(id = "liverpool", sequence = 9)),
+      listOf(
+        DataTypes.LimitOrderMatch(
+          DataTypes.OrderId(id = "liverpool", sequence = 9),
+          tradeSide = DataTypes.Side.BID,
+          price = 10.toBigDecimal(),
+          quantity = 10.toBigDecimal(),
+          fillSide = DataTypes.Side.ASK,
+          fillPrice = 8.toBigDecimal(),
+          quantityMatches = listOf(
+            DataTypes.QuantityMatch(ask_3_R8.askId.id, 0, 3.toBigDecimal(), 0.toBigDecimal()),
+          )
+        )
+      )
+    )
+    printBookToConsole(book)
+
+    Assertions.assertEquals(2, book.bids.size)
+    Assertions.assertEquals(1, book.trades.size)
+    Assertions.assertEquals(1, book.asks.size)
+
+    Assertions.assertEquals(7.toBigDecimal(), book.bids[bid_10_at_R10.price]!![0].quantity)
+    Assertions.assertEquals(3.toBigDecimal(), book.trades[0].fillQuantity.taken)
   }
 
   @Test
   fun add_bid_with_existing_asks_bids_shuffle() {
     val book = DataTypes.LimitOrderBook(DataTypes.CurrencyPair.BTCZAR)
-    book.bids[TestData.bid_10_at_R10.price] = mutableListOf(TestData.bid_10_at_R10) //37
-    book.asks[TestData.ask_7_R20.price] = mutableListOf(TestData.ask_7_R20, TestData.ask_30_R20)
-    book.asks[TestData.ask_3_R89.price] = mutableListOf(TestData.ask_3_R89)
+    book.bids[bid_10_at_R10.price] = mutableListOf(bid_10_at_R10) //37
+    book.asks[ask_7_R20.price] = mutableListOf(ask_7_R20, ask_30_R20)
+    book.asks[ask_3_R89.price] = mutableListOf(ask_3_R89)
 
     printBookToConsole(book)
 
     reshuffle(
       book,
-      TestData.bid_49_at_R30.copy(bidId = DataTypes.OrderId(id = "liverpool", sequence = 9)),
+      bid_49_at_R30.copy(bidId = DataTypes.OrderId(id = "liverpool", sequence = 9)),
       listOf(
         DataTypes.LimitOrderMatch(
           DataTypes.OrderId(id = "liverpool", sequence = 9),
@@ -165,8 +210,8 @@ class BidTests {
           fillSide = DataTypes.Side.ASK,
           fillPrice = 20.toBigDecimal(),
           quantityMatches = listOf(
-            DataTypes.QuantityMatch(TestData.ask_7_R20.askId.id, 0, 7.toBigDecimal(), 0.toBigDecimal()),
-            DataTypes.QuantityMatch(TestData.ask_30_R20.askId.id, 1, 30.toBigDecimal(), 0.toBigDecimal())
+            DataTypes.QuantityMatch(ask_7_R20.askId.id, 0, 7.toBigDecimal(), 0.toBigDecimal()),
+            DataTypes.QuantityMatch(ask_30_R20.askId.id, 1, 30.toBigDecimal(), 0.toBigDecimal())
           )
         )
       )
@@ -176,12 +221,14 @@ class BidTests {
     Assertions.assertEquals(2, book.trades.size)
     Assertions.assertEquals(1, book.asks.size)
 
-    Assertions.assertEquals(12.toBigDecimal(), book.bids[TestData.bid_49_at_R30.price]!![0].quantity)
-    Assertions.assertEquals("liverpool", book.bids[TestData.bid_49_at_R30.price]!![0].bidId.id)
+    //book.bids.higherEntry(bidPrice)
+
+    Assertions.assertEquals(12.toBigDecimal(), book.bids[bid_49_at_R30.price]!![0].quantity)
+    Assertions.assertEquals("liverpool", book.bids[bid_49_at_R30.price]!![0].bidId.id)
 
 
-    Assertions.assertEquals(10.toBigDecimal(), book.bids[TestData.bid_10_at_R10.price]!![0].quantity)
-    Assertions.assertEquals(10.toBigDecimal(), book.bids[TestData.bid_10_at_R10.price]!![0].price)
+    Assertions.assertEquals(10.toBigDecimal(), book.bids[bid_10_at_R10.price]!![0].quantity)
+    Assertions.assertEquals(10.toBigDecimal(), book.bids[bid_10_at_R10.price]!![0].price)
 
     Assertions.assertEquals("liverpool", book.trades[0].orderId.id)
     Assertions.assertEquals("liverpool", book.trades[1].orderId.id)
@@ -195,7 +242,7 @@ class BidTests {
 
     reshuffle(
       book,
-      TestData.bid_49_at_R30.copy(bidId = DataTypes.OrderId(id = "liverpool", sequence = 9)),
+      bid_49_at_R30.copy(bidId = DataTypes.OrderId(id = "liverpool", sequence = 9)),
       listOf(
         DataTypes.LimitOrderMatch(
           DataTypes.OrderId(id = "liverpool", sequence = 9),
@@ -213,7 +260,7 @@ class BidTests {
     Assertions.assertEquals(0, book.trades.size)
     Assertions.assertEquals(0, book.asks.size)
 
-    Assertions.assertEquals(49.toBigDecimal(), book.bids[TestData.bid_49_at_R30.price]!![0].quantity)
+    Assertions.assertEquals(49.toBigDecimal(), book.bids[bid_49_at_R30.price]!![0].quantity)
 
     printBookToConsole(book)
   }
@@ -221,38 +268,39 @@ class BidTests {
   @Test
   fun zero_bid_shuffle() {
     val book = DataTypes.LimitOrderBook(DataTypes.CurrencyPair.BTCZAR)
-    book.asks[TestData.ask_7_R20.price] = mutableListOf(TestData.ask_7_R20)
-    book.asks[TestData.ask_22_at_R22.price] = mutableListOf(TestData.ask_22_at_R22)
-    book.asks[TestData.ask_5_at_R90.price] = mutableListOf(TestData.ask_5_at_R90)
+    book.asks[ask_7_R20.price] = mutableListOf(ask_7_R20)
+    book.asks[ask_22_at_R22.price] = mutableListOf(ask_22_at_R22)
+    book.asks[ask_5_at_R90.price] = mutableListOf(ask_5_at_R90)
 
 
     reshuffle(
       book,
-      TestData.bid_29_at_R26.copy(bidId = DataTypes.OrderId(id = "liverpool", sequence = 9)),
+      bid_29_at_R26.copy(bidId = DataTypes.OrderId(id = "liverpool", sequence = 9)),
       listOf(
         DataTypes.LimitOrderMatch(
           DataTypes.OrderId(id = "liverpool", sequence = 9),
           tradeSide = DataTypes.Side.BID,
-          price = TestData.bid_29_at_R26.price,
-          quantity = TestData.bid_29_at_R26.quantity,
+          price = bid_29_at_R26.price,
+          quantity = bid_29_at_R26.quantity,
           fillSide = DataTypes.Side.ASK,
           fillPrice = 20.toBigDecimal(),
           quantityMatches = listOf(
-            DataTypes.QuantityMatch(TestData.ask_7_R20.askId.id, 0, 7.toBigDecimal(), 0.toBigDecimal())
+            DataTypes.QuantityMatch(ask_7_R20.askId.id, 0, 7.toBigDecimal(), 0.toBigDecimal())
           )
         ),
         DataTypes.LimitOrderMatch(
           DataTypes.OrderId(id = "liverpool", sequence = 9),
           tradeSide = DataTypes.Side.BID,
-          price = TestData.bid_29_at_R26.price,
-          quantity = TestData.bid_29_at_R26.quantity,
+          price = bid_29_at_R26.price,
+          quantity = bid_29_at_R26.quantity,
           fillSide = DataTypes.Side.ASK,
           fillPrice = 22.toBigDecimal(),
           quantityMatches = listOf(
-            DataTypes.QuantityMatch(TestData.ask_22_at_R22.askId.id, 0, 22.toBigDecimal(), 0.toBigDecimal())
+            DataTypes.QuantityMatch(ask_22_at_R22.askId.id, 0, 22.toBigDecimal(), 0.toBigDecimal())
           )
         )
-    ))
+      )
+    )
 
 
     Assertions.assertEquals(0, book.bids.size)
@@ -269,10 +317,10 @@ class BidTests {
   fun fully_filled_bid_to_asks() {
 
     val book = DataTypes.LimitOrderBook(DataTypes.CurrencyPair.BTCZAR)
-    book.asks[TestData.ask_7_R20.price] = mutableListOf(TestData.ask_7_R20, TestData.ask_30_R20)
-    book.asks[TestData.ask_22_at_R22.price] = mutableListOf(TestData.ask_22_at_R22)
+    book.asks[ask_7_R20.price] = mutableListOf(ask_7_R20, ask_30_R20)
+    book.asks[ask_22_at_R22.price] = mutableListOf(ask_22_at_R22)
 
-    val matches_a = matchBidToAsks(book, TestData.bid_49_at_R30)
+    val matches_a = matchBidToAsks(book, bid_49_at_R30)
 
     //matches_a.forEach { println(it) }
 
@@ -305,9 +353,9 @@ class BidTests {
   fun partially_filled_bid_to_asks() {
 
     val book = DataTypes.LimitOrderBook(DataTypes.CurrencyPair.BTCZAR)
-    book.asks[TestData.ask_5_R5.price] = mutableListOf(TestData.ask_5_R5)
+    book.asks[ask_5_R5.price] = mutableListOf(ask_5_R5)
 
-    val matches_a = matchBidToAsks(book, TestData.bid_10_at_R10)
+    val matches_a = matchBidToAsks(book, bid_10_at_R10)
 
     //matches_a.forEach { println(it) }
 
@@ -327,10 +375,10 @@ class BidTests {
   @Test
   fun fill_bid_until_max_ask_price() {
     val book = DataTypes.LimitOrderBook(DataTypes.CurrencyPair.BTCZAR)
-    book.asks[TestData.ask_5_R5.price] = mutableListOf(TestData.ask_5_R5)
-    book.asks[TestData.ask_2_at_R7.price] = mutableListOf(TestData.ask_2_at_R7)
+    book.asks[ask_5_R5.price] = mutableListOf(ask_5_R5)
+    book.asks[ask_2_at_R7.price] = mutableListOf(ask_2_at_R7)
 
-    val matches_a = matchBidToAsks(book, TestData.bid_10_at_R5)
+    val matches_a = matchBidToAsks(book, bid_10_at_R5)
 
     matches_a.forEach { println(it) }
 
@@ -347,9 +395,9 @@ class BidTests {
   @Test
   fun fill_zero_bid_to_ask_price() {
     val book = DataTypes.LimitOrderBook(DataTypes.CurrencyPair.BTCZAR)
-    book.asks[TestData.ask_30_R20.price] = mutableListOf(TestData.ask_30_R20)
+    book.asks[ask_30_R20.price] = mutableListOf(ask_30_R20)
 
-    val matches_a = matchBidToAsks(book, TestData.bid_10_at_R5)
+    val matches_a = matchBidToAsks(book, bid_10_at_R5)
 
     matches_a.forEach { println(it) }
 
@@ -365,7 +413,7 @@ class BidTests {
   fun match_bid_to_empty_asks() {
     val book = DataTypes.LimitOrderBook(DataTypes.CurrencyPair.BTCZAR)
 
-    val matches_a = matchBidToAsks(book, TestData.bid_10_at_R5)
+    val matches_a = matchBidToAsks(book, bid_10_at_R5)
 
     matches_a.forEach { println(it) }
 

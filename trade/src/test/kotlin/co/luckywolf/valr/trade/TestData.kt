@@ -13,6 +13,14 @@ object TestData {
     account = DataTypes.Trader("tag")
   )
 
+  val bid_3_at_R5 = DataTypes.Bid(
+    DataTypes.OrderId(sequence = 1),
+    BigDecimal(3),
+    price = BigDecimal(5),
+    DataTypes.CurrencyPair.BTCZAR,
+    account = DataTypes.Trader("tag")
+  )
+
   val bid_10_at_R5 = DataTypes.Bid(
     DataTypes.OrderId(sequence = 1),
     BigDecimal(10),
@@ -111,6 +119,14 @@ object TestData {
     DataTypes.OrderId(sequence = 1),
     BigDecimal(7),
     price = BigDecimal(20),
+    DataTypes.CurrencyPair.BTCZAR,
+    trader = DataTypes.Trader("tag2")
+  )
+
+  val ask_3_R8 = DataTypes.Ask(
+    DataTypes.OrderId(sequence = 1),
+    BigDecimal(3),
+    price = BigDecimal(8),
     DataTypes.CurrencyPair.BTCZAR,
     trader = DataTypes.Trader("tag2")
   )
