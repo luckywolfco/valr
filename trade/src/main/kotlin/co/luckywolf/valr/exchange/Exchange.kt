@@ -293,15 +293,20 @@ object Trade {
     ): List<DataTypes.LimitOrderMatch> {
 
       when {
+
+        book.bids.isEmpty() -> {
+          return trades
+        }
+        //sell at R5  buy at R10
         ask.price > bidPrice || quantityRequired == zero -> {
           return trades
         }
-        n >= book.asks.size -> {
+        n >= book.bids.size -> {
           return trades
         }
         else -> {
           val quantityMatches =
-            matchAskQuantityToBidQuantities(ask, bids)
+            matchAskQuantityToBidQuantities(ask.quantity, bids)
 
           val quantityOutstanding =
             getQuantityOutstanding(quantityRequired, quantityMatches)
@@ -361,15 +366,15 @@ object Trade {
 
     tailrec fun match(
       n: Int,
-      quantityRequired: BigDecimal,
+      remainingRequired: BigDecimal,
     ): List<DataTypes.QuantityMatch> {
 
       when {
-        quantityRequired == zero -> return quantityMatches
+        remainingRequired == zero -> return quantityMatches
         n >= asks.size -> return quantityMatches
         else -> {
           val taken = takeAvailableQuantityOnOffer(
-            quantityRequired = quantityRequired,
+            quantityRequired = remainingRequired,
             quantityAvailable = asks[n].quantity
           )
 
@@ -382,7 +387,7 @@ object Trade {
             )
           )
 
-          return match(n + 1, quantityRequired - taken.taken)
+          return match(n + 1, remainingRequired - taken.taken)
         }
       }
     }
@@ -390,7 +395,7 @@ object Trade {
   }
 
   fun matchAskQuantityToBidQuantities(
-    ask: DataTypes.Ask,
+    quantityRequired: BigDecimal,
     bids: List<DataTypes.Bid>,
   ): List<DataTypes.QuantityMatch> {
 
@@ -398,15 +403,15 @@ object Trade {
 
     tailrec fun match(
       n: Int,
-      quantityRequired: BigDecimal,
+      remainingRequired: BigDecimal,
     ): List<DataTypes.QuantityMatch> {
 
       when {
-        quantityRequired == zero -> return quantityMatches
+        remainingRequired == zero -> return quantityMatches
         n >= bids.size -> return quantityMatches
         else -> {
           val taken = takeAvailableQuantityOnOffer(
-            quantityRequired = quantityRequired,
+            quantityRequired = remainingRequired,
             quantityAvailable = bids[n].quantity
           )
 
@@ -419,11 +424,11 @@ object Trade {
             )
           )
 
-          return match(n + 1, quantityRequired - taken.taken)
+          return match(n + 1, remainingRequired - taken.taken)
         }
       }
     }
-    return match(0, ask.quantity)
+    return match(0, quantityRequired)
   }
 
   fun takeAvailableQuantityOnOffer(
@@ -530,7 +535,7 @@ object Trade {
             price = order.price,
             currencyPair = order.currencyPair,
             timeInForce = order.timeInForce,
-            trader = order.account
+            account = order.account
           )
 
           reshuffle(book, ask, matchAskToBids(book, ask))

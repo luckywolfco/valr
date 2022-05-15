@@ -1,9 +1,7 @@
 package co.luckywolf.valr
 
-import arrow.core.some
 import co.luckywolf.valr.api.ApiVerticle
 import co.luckywolf.valr.protocol.DataTypes
-import io.vertx.core.Handler
 import io.vertx.core.Vertx
 import io.vertx.core.http.HttpMethod
 import io.vertx.junit5.VertxExtension
@@ -13,6 +11,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
+
+//I cannot get the verticle to run without blocking after deploying. Not even stackoverflow could help :)
 
 @ExtendWith(VertxExtension::class)
 class TestVerticle {

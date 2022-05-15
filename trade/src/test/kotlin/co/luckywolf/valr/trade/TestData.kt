@@ -13,6 +13,22 @@ object TestData {
     account = DataTypes.Trader("tag")
   )
 
+  val bid_14_at_R25 = DataTypes.Bid(
+    DataTypes.OrderId(sequence = 1),
+    BigDecimal(14),
+    price = BigDecimal(25),
+    DataTypes.CurrencyPair.BTCZAR,
+    account = DataTypes.Trader("tag")
+  )
+
+  val ask_10_at_R10 = DataTypes.Ask(
+    DataTypes.OrderId(sequence = 1),
+    BigDecimal(10),
+    price = BigDecimal(10),
+    DataTypes.CurrencyPair.BTCZAR,
+    account = DataTypes.Trader("tag")
+  )
+
   val bid_3_at_R5 = DataTypes.Bid(
     DataTypes.OrderId(sequence = 1),
     BigDecimal(3),
@@ -29,6 +45,14 @@ object TestData {
     account = DataTypes.Trader("tag")
   )
 
+  val ask_10_at_R5 = DataTypes.Ask(
+    DataTypes.OrderId(sequence = 1),
+    BigDecimal(10),
+    price = BigDecimal(5),
+    DataTypes.CurrencyPair.BTCZAR,
+    account = DataTypes.Trader("tag")
+  )
+
   val bid_50_at_R100 = DataTypes.Bid(
     DataTypes.OrderId(sequence = 1),
     BigDecimal(50),
@@ -36,6 +60,31 @@ object TestData {
     DataTypes.CurrencyPair.BTCZAR,
     account = DataTypes.Trader("tag")
   )
+
+  val ask_100_at_R100 = DataTypes.Ask(
+    DataTypes.OrderId(sequence = 1),
+    BigDecimal(100),
+    price = BigDecimal(100),
+    DataTypes.CurrencyPair.BTCZAR,
+    account = DataTypes.Trader("tag")
+  )
+
+  val ask_51_at_R100 = DataTypes.Ask(
+    DataTypes.OrderId(sequence = 1),
+    BigDecimal(51),
+    price = BigDecimal(100),
+    DataTypes.CurrencyPair.BTCZAR,
+    account = DataTypes.Trader("tag")
+  )
+
+  val ask_50_at_R100 = DataTypes.Ask(
+    DataTypes.OrderId(sequence = 1),
+    BigDecimal(50),
+    price = BigDecimal(100),
+    DataTypes.CurrencyPair.BTCZAR,
+    account = DataTypes.Trader("tag")
+  )
+
   val bid_50_1_at_R100 = DataTypes.Bid(
     DataTypes.OrderId(sequence = 2),
     BigDecimal(50),
@@ -64,7 +113,15 @@ object TestData {
     BigDecimal(10),
     price = BigDecimal(20),
     DataTypes.CurrencyPair.BTCZAR,
-    trader = DataTypes.Trader("tag")
+    account = DataTypes.Trader("tag")
+  )
+
+  val bid_10_at_R20 = DataTypes.Bid(
+    DataTypes.OrderId(sequence = 1),
+    BigDecimal(10),
+    price = BigDecimal(20),
+    DataTypes.CurrencyPair.BTCZAR,
+    account = DataTypes.Trader("tag")
   )
 
   val ask_2_at_R7 = DataTypes.Ask(
@@ -72,7 +129,23 @@ object TestData {
     BigDecimal(2),
     price = BigDecimal(7),
     DataTypes.CurrencyPair.BTCZAR,
-    trader = DataTypes.Trader("tag")
+    account = DataTypes.Trader("tag")
+  )
+
+  val bid_12_at_R6 = DataTypes.Bid(
+    DataTypes.OrderId(sequence = 1),
+    BigDecimal(12),
+    price = BigDecimal(6),
+    DataTypes.CurrencyPair.BTCZAR,
+    account = DataTypes.Trader("tag")
+  )
+
+  val bid_2_at_R7 = DataTypes.Bid(
+    DataTypes.OrderId(sequence = 1),
+    BigDecimal(2),
+    price = BigDecimal(7),
+    DataTypes.CurrencyPair.BTCZAR,
+    account = DataTypes.Trader("tag")
   )
 
   val ask_22_at_R22 = DataTypes.Ask(
@@ -80,7 +153,7 @@ object TestData {
     BigDecimal(22),
     price = BigDecimal(22),
     DataTypes.CurrencyPair.BTCZAR,
-    trader = DataTypes.Trader("tag")
+    account = DataTypes.Trader("tag")
   )
 
   val ask_5_at_R90 = DataTypes.Ask(
@@ -88,7 +161,7 @@ object TestData {
     BigDecimal(5),
     price = BigDecimal(90),
     DataTypes.CurrencyPair.BTCZAR,
-    trader = DataTypes.Trader("tag")
+    account = DataTypes.Trader("tag")
   )
 
   val ask_30_R20 = DataTypes.Ask(
@@ -96,7 +169,23 @@ object TestData {
     BigDecimal(30),
     price = BigDecimal(20),
     DataTypes.CurrencyPair.BTCZAR,
-    trader = DataTypes.Trader("tag2")
+    account = DataTypes.Trader("tag2")
+  )
+
+  val ask_14_R6 = DataTypes.Ask(
+    DataTypes.OrderId(sequence = 1),
+    BigDecimal(14),
+    price = BigDecimal(6),
+    DataTypes.CurrencyPair.BTCZAR,
+    account = DataTypes.Trader("tag2")
+  )
+
+  val bid_30_R20 = DataTypes.Bid(
+    DataTypes.OrderId(sequence = 1),
+    BigDecimal(30),
+    price = BigDecimal(20),
+    DataTypes.CurrencyPair.BTCZAR,
+    account = DataTypes.Trader("tag2")
   )
 
   val ask_42_R20 = DataTypes.Ask(
@@ -104,7 +193,7 @@ object TestData {
     BigDecimal(42),
     price = BigDecimal(20),
     DataTypes.CurrencyPair.BTCZAR,
-    trader = DataTypes.Trader("tag2")
+    account = DataTypes.Trader("tag2")
   )
 
   val ask_3_R89 = DataTypes.Ask(
@@ -112,7 +201,7 @@ object TestData {
     BigDecimal(3),
     price = BigDecimal(89),
     DataTypes.CurrencyPair.BTCZAR,
-    trader = DataTypes.Trader("tag2")
+    account = DataTypes.Trader("tag2")
   )
 
   val ask_7_R20 = DataTypes.Ask(
@@ -120,7 +209,15 @@ object TestData {
     BigDecimal(7),
     price = BigDecimal(20),
     DataTypes.CurrencyPair.BTCZAR,
-    trader = DataTypes.Trader("tag2")
+    account = DataTypes.Trader("tag2")
+  )
+
+  val bid_7_R20 = DataTypes.Bid(
+    DataTypes.OrderId(sequence = 1),
+    BigDecimal(7),
+    price = BigDecimal(20),
+    DataTypes.CurrencyPair.BTCZAR,
+    account = DataTypes.Trader("tag2")
   )
 
   val ask_3_R8 = DataTypes.Ask(
@@ -128,7 +225,7 @@ object TestData {
     BigDecimal(3),
     price = BigDecimal(8),
     DataTypes.CurrencyPair.BTCZAR,
-    trader = DataTypes.Trader("tag2")
+    account = DataTypes.Trader("tag2")
   )
 
   val ask_5_R5 = DataTypes.Ask(
@@ -136,7 +233,7 @@ object TestData {
     BigDecimal(5),
     price = BigDecimal(5),
     DataTypes.CurrencyPair.BTCZAR,
-    trader = DataTypes.Trader("tag2")
+    account = DataTypes.Trader("tag2")
   )
 
   val ask_200_at_20 = DataTypes.Ask(
@@ -144,6 +241,14 @@ object TestData {
     BigDecimal(200),
     price = BigDecimal(20),
     DataTypes.CurrencyPair.BTCZAR,
-    trader = DataTypes.Trader("tag")
+    account = DataTypes.Trader("tag")
+  )
+
+  val bid_200_at_20 = DataTypes.Bid(
+    DataTypes.OrderId(sequence = 1),
+    BigDecimal(200),
+    price = BigDecimal(20),
+    DataTypes.CurrencyPair.BTCZAR,
+    account = DataTypes.Trader("tag")
   )
 }

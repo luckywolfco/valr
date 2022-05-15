@@ -20,6 +20,7 @@ import co.luckywolf.valr.trade.TestData.ask_5_at_R90
 import co.luckywolf.valr.trade.TestData.ask_7_R20
 import co.luckywolf.valr.trade.TestData.bid_10_at_R10
 import co.luckywolf.valr.trade.TestData.bid_10_at_R5
+import co.luckywolf.valr.trade.TestData.bid_14_at_R25
 import co.luckywolf.valr.trade.TestData.bid_29_at_R26
 import co.luckywolf.valr.trade.TestData.bid_3_at_R5
 import co.luckywolf.valr.trade.TestData.bid_49_at_R30
@@ -344,6 +345,25 @@ class BidTests {
 
     Assertions.assertEquals(
       zero, getQuantityOutstanding(49.toBigDecimal(),
+        matches_a.flatMap { it.quantityMatches })
+    )
+
+  }
+
+  @Test
+  fun more_asks_than_bid() {
+    val book = DataTypes.LimitOrderBook(DataTypes.CurrencyPair.BTCZAR)
+    book.asks[ask_5_R5.price] = mutableListOf(ask_5_R5,ask_5_R5)
+    book.asks[ask_7_R20.price] = mutableListOf(ask_7_R20)
+
+    val matches_a = matchBidToAsks(book, bid_14_at_R25)
+
+    Assertions.assertEquals(0, matches_a[1].quantityMatches[0].index)
+    Assertions.assertEquals(4.toBigDecimal(), matches_a[1].quantityMatches[0].taken)
+    Assertions.assertEquals(3.toBigDecimal(), matches_a[1].quantityMatches[0].left)
+
+    Assertions.assertEquals(
+      0.toBigDecimal(), getQuantityOutstanding(14.toBigDecimal(),
         matches_a.flatMap { it.quantityMatches })
     )
 

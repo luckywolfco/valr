@@ -3,7 +3,6 @@ package co.luckywolf.valr.api
 import arrow.core.Option
 import arrow.core.getOrElse
 import arrow.core.none
-import arrow.core.orElse
 import co.luckywolf.valr.api.ApiFunctions.matchPathToPermissionRules
 import co.luckywolf.valr.api.ApiFunctions.matchPathToStartsWithMatchingRule
 import co.luckywolf.valr.api.ApiFunctions.verifyUserPermissionsFor

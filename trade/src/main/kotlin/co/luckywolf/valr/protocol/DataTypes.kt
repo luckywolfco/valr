@@ -145,7 +145,7 @@ object DataTypes {
     val currencyPair: CurrencyPair,
     val timeInForce: TimeInForce = TimeInForce.GTC,
     val timestamp: Long = Clock.systemUTC().millis(),
-    val trader: Trader,
+    val account: Trader,
     val postOnly: Boolean = false
   )
 
