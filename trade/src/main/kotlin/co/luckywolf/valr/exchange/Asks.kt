@@ -172,8 +172,7 @@ object Asks {
 
     }.sumOf { it }).map {
       when {
-        //fully filled with trades
-
+        //fully filled - no outstanding quantities left when matching
         ((ask.quantity - it) == DataTypes.zero || it == DataTypes.zero) && matches.isNotEmpty()
           && matches.flatMap { qm -> qm.quantityMatches }.isNotEmpty() -> {
           removeAskFrom(book, ask)

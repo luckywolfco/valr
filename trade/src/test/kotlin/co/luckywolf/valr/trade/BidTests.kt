@@ -8,6 +8,7 @@ import co.luckywolf.valr.exchange.Trade.getQuantityOutstanding
 import co.luckywolf.valr.exchange.Trade.printBookToConsole
 import co.luckywolf.valr.protocol.DataTypes
 import co.luckywolf.valr.protocol.DataTypes.zero
+import co.luckywolf.valr.trade.TestData.ask_0_55_R20
 import co.luckywolf.valr.trade.TestData.ask_10_at_R20
 import co.luckywolf.valr.trade.TestData.ask_200_at_20
 import co.luckywolf.valr.trade.TestData.ask_22_at_R22
@@ -408,6 +409,23 @@ class BidTests {
 
     Assertions.assertEquals(
       zero, getQuantityOutstanding(5.toBigDecimal(),
+        matches_a.flatMap { it.quantityMatches })
+    )
+  }
+
+  @Test
+  fun fill_zero_bid_to_ask_price_fractions() {
+    val book = DataTypes.LimitOrderBook(DataTypes.CurrencyPair.BTCZAR)
+    book.asks[ask_0_55_R20.price] = mutableListOf(ask_0_55_R20)
+
+    val matches_a = matchBidToAsks(book, bid_10_at_R5)
+
+    matches_a.forEach { println(it) }
+
+    Assertions.assertEquals(0, matches_a.size)
+
+    Assertions.assertEquals(
+      10.toBigDecimal(), getQuantityOutstanding(10.toBigDecimal(),
         matches_a.flatMap { it.quantityMatches })
     )
   }
