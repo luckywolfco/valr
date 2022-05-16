@@ -1,11 +1,11 @@
 package co.luckywolf.valr.trade
 
+import co.luckywolf.valr.exchange.Bids.matchBidQuantityToAskQuantities
+import co.luckywolf.valr.exchange.Bids.matchBidToAsks
+import co.luckywolf.valr.exchange.Bids.reshuffle
 import co.luckywolf.valr.exchange.Trade
 import co.luckywolf.valr.exchange.Trade.getQuantityOutstanding
-import co.luckywolf.valr.exchange.Trade.matchBidQuantityToAskQuantities
-import co.luckywolf.valr.exchange.Trade.matchBidToAsks
 import co.luckywolf.valr.exchange.Trade.printBookToConsole
-import co.luckywolf.valr.exchange.Trade.reshuffle
 import co.luckywolf.valr.protocol.DataTypes
 import co.luckywolf.valr.protocol.DataTypes.zero
 import co.luckywolf.valr.trade.TestData.ask_10_at_R20
@@ -269,7 +269,7 @@ class BidTests {
   @Test
   fun zero_bid_shuffle() {
     val book = DataTypes.LimitOrderBook(DataTypes.CurrencyPair.BTCZAR)
-    book.asks[ask_7_R20.price] = mutableListOf(ask_7_R20)
+    book.asks[ask_7_R20.price] = mutableListOf(ask_7_R20) //sell
     book.asks[ask_22_at_R22.price] = mutableListOf(ask_22_at_R22)
     book.asks[ask_5_at_R90.price] = mutableListOf(ask_5_at_R90)
 

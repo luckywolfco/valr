@@ -1,8 +1,8 @@
 package co.luckywolf.valr.api
 
+import co.luckywolf.valr.exchange.Asks
+import co.luckywolf.valr.exchange.Bids
 import co.luckywolf.valr.exchange.Trade
-import co.luckywolf.valr.exchange.Trade.getAsksFor
-import co.luckywolf.valr.exchange.Trade.getBidsFor
 import co.luckywolf.valr.exchange.Trade.getTradesFor
 import co.luckywolf.valr.exchange.Trade.tryPlaceOrderFor
 import co.luckywolf.valr.protocol.ApiTypes
@@ -97,7 +97,7 @@ class ApiVerticle() : AbstractVerticle() {
 
           val limitOrderBook = tradeEngine.limitOrderBookBy(r.currencyPair)
 
-          val asks = getAsksFor(limitOrderBook, r.limit).map { ask ->
+          val asks = Asks.getAsksFor(limitOrderBook, r.limit).map { ask ->
             ask.value.sumOf { a -> a.quantity }
             JsonObject()
               .put("side", DataTypes.Side.ASK.name)
@@ -107,7 +107,7 @@ class ApiVerticle() : AbstractVerticle() {
               .put("orderCount", ask.value.size)
           }
 
-          val bids = getBidsFor(limitOrderBook, r.limit).map { bid ->
+          val bids = Bids.getBidsFor(limitOrderBook, r.limit).map { bid ->
             bid.value.sumOf { a -> a.quantity }
             JsonObject()
               .put("side", DataTypes.Side.BID.name)
