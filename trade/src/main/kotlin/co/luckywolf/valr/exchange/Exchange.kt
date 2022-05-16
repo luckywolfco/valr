@@ -80,7 +80,7 @@ object Trade {
     } else {
       DataTypes.QuantityTaken(
         quantityRequired,
-        quantityAvailable - quantityRequired
+        quantityAvailable.minus(quantityRequired).toDecimalPlaces()
       )
     }
   }

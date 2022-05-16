@@ -32,6 +32,7 @@ import co.luckywolf.valr.trade.TestData.bid_5_at_R90
 import co.luckywolf.valr.trade.TestData.bid_7_R20
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import java.text.DecimalFormat
 
 
 class AskTests {
@@ -44,7 +45,17 @@ class AskTests {
     Assertions.assertEquals(-1,DataTypes.LowHighPriceComparator().compare(right,left))
 
     val one = 0.666666.toDecimalPlaces().minus(0.333.toDecimalPlaces())
-    println(one)
+
+    val format = DecimalFormat("#.######").apply {
+      isParseBigDecimal = true
+    }
+    //format.isParseBigDecimal = true;
+   val d = "0.0002".toBigDecimal()
+   val s2 =  "0.0002".toBigDecimal()
+    println(d+s2)
+    val s = format.parse("0.2").toDouble()
+    println(s)
+    //println(one)
 
   }
 
