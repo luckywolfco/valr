@@ -1,5 +1,6 @@
 package co.luckywolf.valr.trade
 
+import arrow.core.some
 import co.luckywolf.valr.exchange.Asks.matchAskQuantityToBidQuantities
 import co.luckywolf.valr.exchange.Asks.matchAskToBids
 import co.luckywolf.valr.exchange.Asks.reshuffle
@@ -29,17 +30,32 @@ import co.luckywolf.valr.trade.TestData.bid_30_R20
 import co.luckywolf.valr.trade.TestData.bid_50_at_R100
 import co.luckywolf.valr.trade.TestData.bid_5_at_R90
 import co.luckywolf.valr.trade.TestData.bid_7_R20
+import org.decimal4j.immutable.Decimal2f
+import org.decimal4j.util.DoubleRounder
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
+import java.math.RoundingMode
+
 
 class AskTests {
 
   @Test
   fun double() {
-    val f1 = 10f
-    val f2 = 3f
-    println("Float:\t 10 / 3 = " + f1 / f2)
+    val z = 0.000000
+    val z2: Double = DoubleRounder.round(0.0,6)
+    println(z2)
+    println("same "  +z.compareTo(z2))
+    val bd = DoubleRounder.round(9500.111111,6)
+    val bd2 = DoubleRounder.round(9500.111111,6)
+    println(bd.compareTo(bd2))
+    println(bd.plus(bd2))
+    //bd.scale(4)
+    //println(bd.scale)
+    //val d = DoubleRounder.round(0.434343434.toDouble(),4)
+     //bd.setScale(4)
+    println(bd)
+
 
   }
 
@@ -51,8 +67,8 @@ class AskTests {
       book,
       DataTypes.Order(
         DataTypes.Side.ASK,
-        quantity = BigDecimal(0.5),
-        price = BigDecimal(0.5),
+        quantity = BigDecimal(0.50000),
+        price = BigDecimal(0.50000),
         currencyPair = DataTypes.CurrencyPair.BTCZAR,
         timeInForce = DataTypes.TimeInForce.GTC,
         account = DataTypes.Trader("333"),
@@ -86,6 +102,17 @@ class AskTests {
 
     Assertions.assertEquals(book.asks.size, 3)
 
+    Trade.tryPlaceOrderFor(
+      book,
+      DataTypes.Order(
+        DataTypes.Side.BID,
+        quantity = BigDecimal(0.30),
+        price = BigDecimal(0.42),
+        currencyPair = DataTypes.CurrencyPair.BTCZAR,
+        timeInForce = DataTypes.TimeInForce.GTC,
+        account = DataTypes.Trader("333"),
+      )
+    )
 
     printBookToConsole(book)
   }

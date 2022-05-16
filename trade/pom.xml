@@ -89,6 +89,12 @@
       <version>1.15</version>
     </dependency>
 
+    <dependency>
+      <groupId>org.decimal4j</groupId>
+      <artifactId>decimal4j</artifactId>
+      <version>1.0.3</version>
+      <scope>compile</scope>
+    </dependency>
 
     <dependency>
       <groupId>io.arrow-kt</groupId>
