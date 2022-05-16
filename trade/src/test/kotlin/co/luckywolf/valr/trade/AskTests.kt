@@ -3,22 +3,19 @@ package co.luckywolf.valr.trade
 import co.luckywolf.valr.exchange.Asks.matchAskQuantityToBidQuantities
 import co.luckywolf.valr.exchange.Asks.matchAskToBids
 import co.luckywolf.valr.exchange.Asks.reshuffle
-import co.luckywolf.valr.exchange.Bids.matchBidQuantityToAskQuantities
+import co.luckywolf.valr.exchange.Trade
 import co.luckywolf.valr.exchange.Trade.getQuantityOutstanding
 import co.luckywolf.valr.exchange.Trade.printBookToConsole
 import co.luckywolf.valr.protocol.DataTypes
 import co.luckywolf.valr.protocol.DataTypes.zero
 import co.luckywolf.valr.trade.TestData.ask_100_at_R100
 import co.luckywolf.valr.trade.TestData.ask_10_at_R10
-import co.luckywolf.valr.trade.TestData.ask_10_at_R20
 import co.luckywolf.valr.trade.TestData.ask_10_at_R5
 import co.luckywolf.valr.trade.TestData.ask_14_R6
-import co.luckywolf.valr.trade.TestData.ask_200_at_20
 import co.luckywolf.valr.trade.TestData.ask_29_at_R26
 import co.luckywolf.valr.trade.TestData.ask_30_R20
 import co.luckywolf.valr.trade.TestData.ask_49_at_R20
 import co.luckywolf.valr.trade.TestData.ask_49_at_R30
-import co.luckywolf.valr.trade.TestData.ask_50_at_R100
 import co.luckywolf.valr.trade.TestData.ask_50_at_R7
 import co.luckywolf.valr.trade.TestData.ask_5_R5
 import co.luckywolf.valr.trade.TestData.ask_7_R20
@@ -34,27 +31,66 @@ import co.luckywolf.valr.trade.TestData.bid_5_at_R90
 import co.luckywolf.valr.trade.TestData.bid_7_R20
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 
 class AskTests {
 
-  //  @Test
-//  fun place_bid_order() {
-//
-//    val book = DataTypes.LimitOrderBook(DataTypes.CurrencyPair.BTCZAR)
-//    Trade.tryPlaceOrderFor(
-//      book,
-//      DataTypes.Order(
-//        DataTypes.Side.BID,
-//        quantity = BigDecimal(100),
-//        price = BigDecimal(20),
-//        currencyPair = DataTypes.CurrencyPair.BTCZAR,
-//        timeInForce = DataTypes.TimeInForce.GTC,
-//        account = DataTypes.Trader("333"),
-//      )
-//    )
-//    printBookToConsole(book)
-//  }
-//
+  @Test
+  fun double() {
+    val f1 = 10f
+    val f2 = 3f
+    println("Float:\t 10 / 3 = " + f1 / f2)
+
+  }
+
+  @Test
+  fun place_bid_order() {
+
+    val book = DataTypes.LimitOrderBook(DataTypes.CurrencyPair.BTCZAR)
+    Trade.tryPlaceOrderFor(
+      book,
+      DataTypes.Order(
+        DataTypes.Side.ASK,
+        quantity = BigDecimal(0.5),
+        price = BigDecimal(0.5),
+        currencyPair = DataTypes.CurrencyPair.BTCZAR,
+        timeInForce = DataTypes.TimeInForce.GTC,
+        account = DataTypes.Trader("333"),
+      )
+    )
+    Trade.tryPlaceOrderFor(
+      book,
+      DataTypes.Order(
+        DataTypes.Side.ASK,
+        quantity = BigDecimal(0.45),
+        price = BigDecimal(0.45),
+        currencyPair = DataTypes.CurrencyPair.BTCZAR,
+        timeInForce = DataTypes.TimeInForce.GTC,
+        account = DataTypes.Trader("333"),
+      )
+    )
+
+    Assertions.assertEquals(book.asks.size, 2)
+
+    Trade.tryPlaceOrderFor(
+      book,
+      DataTypes.Order(
+        DataTypes.Side.ASK,
+        quantity = BigDecimal(0.42),
+        price = BigDecimal(0.42),
+        currencyPair = DataTypes.CurrencyPair.BTCZAR,
+        timeInForce = DataTypes.TimeInForce.GTC,
+        account = DataTypes.Trader("333"),
+      )
+    )
+
+    Assertions.assertEquals(book.asks.size, 3)
+
+
+    printBookToConsole(book)
+  }
+
+
   @Test
   fun match_ask_quantity_to_bid_quantities() {
 

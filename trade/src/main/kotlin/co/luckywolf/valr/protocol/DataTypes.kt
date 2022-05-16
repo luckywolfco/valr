@@ -62,10 +62,10 @@ object DataTypes {
   class HighLowPriceComparator : Comparator<BigDecimal> {
     override fun compare(left: BigDecimal, right: BigDecimal): Int {
 
-      if (left == right)
+      if (left.compareTo(right) == 0)
         return 0;
 
-      if (left > right)
+      if (left.compareTo(right) == -1)
         return -1;
 
       return 1;
@@ -75,14 +75,14 @@ object DataTypes {
   class LowHighPriceComparator : Comparator<BigDecimal> {
     override fun compare(left: BigDecimal, right: BigDecimal): Int {
 
-      if (left == right) {
+      if (left.compareTo(right) == 0) {
         return 0
       }
 
-      if (left > right)
-        return 1;
+      if (left.compareTo(right) < 1)
+        return -1;
 
-      return -1;
+      return 1;
     }
   }
 

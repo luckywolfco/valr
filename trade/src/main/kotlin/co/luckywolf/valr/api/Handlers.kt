@@ -31,10 +31,10 @@ class ApiPermissionAuthorizationHandler(val accountPermissionService: (String) -
       verifyUserPermissionsFor(accountPermissions, p).map {
         rc.next()
       }.mapLeft {
-        rc.response().setStatusCode(400).end(JsonObject().put("error", "insufficient permissions").toBuffer())
+        rc.response().setStatusCode(403).end(JsonObject().put("error", "insufficient permissions").toBuffer())
       }
     }.getOrElse {
-      rc.response().setStatusCode(400).end(JsonObject().put("error", "unknown permission rule").toBuffer())
+      rc.response().setStatusCode(403).end(JsonObject().put("error", "unknown permission rule").toBuffer())
     }
   }
 
@@ -82,16 +82,16 @@ class ApiKeyAuthenticationHandler(private val accounts: () -> Map<String, DataTy
               rc.next()
             }
             else -> {
-              response.setStatusCode(400).end(JsonObject().put("error", "invalid signature").toBuffer())
+              response.setStatusCode(401).end(JsonObject().put("error", "invalid signature").toBuffer())
             }
           }
         }
         else -> {
-          response.setStatusCode(400).end(JsonObject().put("error", "unknown api key").toBuffer())
+          response.setStatusCode(401).end(JsonObject().put("error", "unknown api key").toBuffer())
         }
       }
     }.mapLeft { err ->
-      response.setStatusCode(400).end(JsonObject().put("error", err.extract().error).toBuffer())
+      response.setStatusCode(401).end(JsonObject().put("error", err.extract().error).toBuffer())
     }
   }
 }
