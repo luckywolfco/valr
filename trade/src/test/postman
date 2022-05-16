@@ -1,0 +1,141 @@
+{
+	"info": {
+		"_postman_id": "a4bd3bc6-b077-4358-951c-81fc304d8e2a",
+		"name": "valr",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "trade history",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-VALR-API-KEY",
+						"type": "text",
+						"value": "warren"
+					},
+					{
+						"key": "X-VALR-SIGNATURE",
+						"type": "text",
+						"value": "f7d38978a714f11567f0b1897072424fb7016dbe3c053c7e4dae6dbb8150f3e65632cbf2af46417e5a2b997ec26be1dfb27949d6e2422d86d5003a8eccaf8d79"
+					},
+					{
+						"key": "X-VALR-TIMESTAMP",
+						"type": "text",
+						"value": "1560007630778"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:9876/v1/marketdata/BTCZAR/tradehistory?skip=0&limit=100",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9876",
+					"path": [
+						"v1",
+						"marketdata",
+						"BTCZAR",
+						"tradehistory"
+					],
+					"query": [
+						{
+							"key": "skip",
+							"value": "0"
+						},
+						{
+							"key": "limit",
+							"value": "100"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "order book",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-VALR-API-KEY",
+						"value": "warren",
+						"type": "text"
+					},
+					{
+						"key": "X-VALR-SIGNATURE",
+						"value": "b057d2323fb2fac56da1d199ee0af0a4a065a4a69fde14861134f57c0850b9b5346f6acad7418819145da7c187f3bb924c39170b99dc75a7a388950d4c88c38c",
+						"type": "text"
+					},
+					{
+						"key": "X-VALR-TIMESTAMP",
+						"value": "1560007630778",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:9876/v1/marketdata/BTCZAR/orderbook",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9876",
+					"path": [
+						"v1",
+						"marketdata",
+						"BTCZAR",
+						"orderbook"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "limit order",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-VALR-API-KEY",
+						"type": "text",
+						"value": "warren"
+					},
+					{
+						"key": "X-VALR-SIGNATURE",
+						"type": "text",
+						"value": "9fd0e99ff44d6e9131e8e6f80a7dbcf29665604ae71de0d70df69e92d606c74528100238bcfbb33c2bfd15e4d3e4ff5d8cb1f146697e885e63384a2a4d8ee2af"
+					},
+					{
+						"key": "X-VALR-TIMESTAMP",
+						"type": "text",
+						"value": "1560007630778"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"side\": \"ASK\",\n    \"quantity\": \"1\",\n    \"price\": \"1.0\",\n    \"pair\": \"BTCZAR\",\n    \"customerOrderId\": \"543ALP\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:9876/v1/orders/limit",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9876",
+					"path": [
+						"v1",
+						"orders",
+						"limit"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
