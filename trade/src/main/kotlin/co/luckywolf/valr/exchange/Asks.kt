@@ -3,8 +3,8 @@ package co.luckywolf.valr.exchange
 import arrow.core.Option
 import arrow.core.Some
 import co.luckywolf.valr.exchange.Trade.getQuantityOutstanding
+import co.luckywolf.valr.exchange.Trade.toDecimalPlaces
 import co.luckywolf.valr.protocol.DataTypes
-import java.math.BigDecimal
 import java.util.concurrent.atomic.AtomicLong
 
 object Asks {
@@ -14,7 +14,7 @@ object Asks {
   fun getAsksFor(
     book: DataTypes.LimitOrderBook,
     limit: Int
-  ): List<MutableMap.MutableEntry<BigDecimal, MutableList<DataTypes.Ask>>> {
+  ): List<MutableMap.MutableEntry<Double, MutableList<DataTypes.Ask>>> {
     return book.asks.entries.take(limit)
   }
 
@@ -31,9 +31,9 @@ object Asks {
 
     fun match(
       n: Int,
-      bidPrice: BigDecimal,
+      bidPrice: Double,
       bids: List<DataTypes.Bid>,
-      quantityRequired: BigDecimal
+      quantityRequired: Double
     ): List<DataTypes.LimitOrderMatch> {
 
       when {
@@ -42,7 +42,7 @@ object Asks {
           return trades
         }
         //sell at R5  buy at R10
-        ask.price > bidPrice || quantityRequired == DataTypes.zero -> {
+        ask.price.compareTo(bidPrice) > 0 || quantityRequired.compareTo(DataTypes.zero) == 0 -> {
           return trades
         }
         n >= book.bids.size -> {
@@ -67,7 +67,7 @@ object Asks {
             )
           )
 
-          return if (quantityOutstanding == DataTypes.zero) {
+          return if (quantityOutstanding.compareTo(DataTypes.zero) == 0) {
             trades
           } else {
 
@@ -94,7 +94,7 @@ object Asks {
   }
 
   fun matchAskQuantityToBidQuantities(
-    quantityRequired: BigDecimal,
+    quantityRequired: Double,
     bids: List<DataTypes.Bid>,
   ): List<DataTypes.QuantityMatch> {
 
@@ -102,11 +102,11 @@ object Asks {
 
     tailrec fun match(
       n: Int,
-      remainingRequired: BigDecimal,
+      remainingRequired: Double,
     ): List<DataTypes.QuantityMatch> {
 
       when {
-        remainingRequired == DataTypes.zero -> return quantityMatches
+        remainingRequired.compareTo(DataTypes.zero) == 0 -> return quantityMatches
         n >= bids.size -> return quantityMatches
         else -> {
           val taken = Trade.takeAvailableQuantityOnOffer(
@@ -123,7 +123,7 @@ object Asks {
             )
           )
 
-          return match(n + 1, remainingRequired - taken.taken)
+          return match(n + 1, remainingRequired.minus(taken.taken).toDecimalPlaces())
         }
       }
     }
@@ -143,6 +143,7 @@ object Asks {
           orderId = ask.askId,
           tradeId = DataTypes.OrderId(sequence = sequence.incrementAndGet()),
           tradeSide = DataTypes.Side.ASK,
+          ask.account,
           price = ask.price,
           quantity = ask.quantity,
           fillSide = DataTypes.Side.ASK,
@@ -151,14 +152,14 @@ object Asks {
         )
       })
 
-      match.quantityMatches.filter { it.left > DataTypes.zero }.forEach { quantityMatch ->
+      match.quantityMatches.filter { it.left.compareTo(DataTypes.zero) == 1 }.forEach { quantityMatch ->
         val price = Option.fromNullable(book.bids[match.fillPrice]?.get(quantityMatch.index))
         price.map {
           book.bids[match.fillPrice]?.set(quantityMatch.index, it.copy(quantity = quantityMatch.left))
         }
       }
 
-      match.quantityMatches.filter { it.left == DataTypes.zero }.forEachIndexed { _, quantityMatch ->
+      match.quantityMatches.filter { it.left.compareTo(DataTypes.zero) == 0 }.forEachIndexed { _, quantityMatch ->
         book.bids[match.fillPrice]?.removeIf { it.bidId.id == quantityMatch.id }
       }
 
@@ -170,10 +171,10 @@ object Asks {
 
       getQuantityOutstanding(ask.quantity, match.quantityMatches)
 
-    }.sumOf { it }).map {
+    }.sumOf { it.toDecimalPlaces() }).map {
       when {
         //fully filled - no outstanding quantities left when matching
-        ((ask.quantity - it) == DataTypes.zero || it == DataTypes.zero) && matches.isNotEmpty()
+        (ask.quantity.minus(it) == DataTypes.zero || it.compareTo(DataTypes.zero) == 0) && matches.isNotEmpty()
           && matches.flatMap { qm -> qm.quantityMatches }.isNotEmpty() -> {
           removeAskFrom(book, ask)
         }

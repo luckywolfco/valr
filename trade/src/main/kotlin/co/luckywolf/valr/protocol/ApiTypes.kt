@@ -1,10 +1,10 @@
 package co.luckywolf.valr.protocol
 
 import arrow.core.*
+import co.luckywolf.valr.exchange.Trade.toDecimalPlaces
 import com.google.gson.annotations.SerializedName
 import io.vertx.core.MultiMap
 import io.vertx.core.json.JsonObject
-import java.math.BigDecimal
 
 object ApiTypes {
 
@@ -41,8 +41,8 @@ object ApiTypes {
   class PlaceLimitOrderApiRequest(
     val currentPair: DataTypes.CurrencyPair,
     val side: DataTypes.Side,
-    val quantity: BigDecimal,
-    val price: BigDecimal,
+    val quantity: Double,
+    val price: Double,
     val postOnly: Boolean,
     val customerOrderId: Option<String>,
     val timeInForce: DataTypes.TimeInForce
@@ -51,8 +51,8 @@ object ApiTypes {
       fun create(accountId: String, request: JsonObject): Either<Validators.ApiError, PlaceLimitOrderApiRequest> {
 
         val side = DataTypes.Side.valueOf(request.getString("side"))
-        val quantity = request.getString("quantity").toBigDecimal()
-        val price = request.getString("price").toBigDecimal()
+        val quantity = request.getString("quantity").toDouble().toDecimalPlaces()
+        val price = request.getString("price").toDouble().toDecimalPlaces()
         val pair = DataTypes.CurrencyPair.valueOf(request.getString("pair"))
         val tif =
           Option.fromNullable(request.getString("timeInForce")).map { DataTypes.TimeInForce.valueOf(it) }

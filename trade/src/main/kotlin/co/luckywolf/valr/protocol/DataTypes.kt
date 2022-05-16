@@ -2,7 +2,7 @@ package co.luckywolf.valr.protocol
 
 import arrow.core.Option
 import arrow.core.none
-import java.math.BigDecimal
+import org.decimal4j.util.DoubleRounder
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.time.Clock
@@ -11,7 +11,7 @@ import java.util.*
 
 object DataTypes {
 
-  val zero = BigDecimal(0)
+  val zero = DoubleRounder.round(0.000000, 6)
 
 
   //match bid to ask
@@ -22,10 +22,11 @@ object DataTypes {
     val orderId: OrderId,
     val tradeId: OrderId,
     val tradeSide: Side,
-    val price: BigDecimal,
-    val quantity: BigDecimal,
+    val account: Trader,
+    val price: Double,
+    val quantity: Double,
     val fillSide: Side,
-    val fillPrice: BigDecimal,
+    val fillPrice: Double,
     val fillQuantity: QuantityMatch,
     val timestamp: Long = Clock.systemUTC().millis(),
   )
@@ -33,47 +34,47 @@ object DataTypes {
   data class LimitOrderMatch(
     val orderId: OrderId,
     val tradeSide: Side,
-    val price: BigDecimal,
-    val quantity: BigDecimal,
+    val price: Double,
+    val quantity: Double,
     val fillSide: Side,
-    val fillPrice: BigDecimal,
+    val fillPrice: Double,
     val quantityMatches: List<QuantityMatch>,
     val timestamp: Long = Clock.systemUTC().millis(),
   )
 
   class QuantityTaken(
-    val taken: BigDecimal,
-    val left: BigDecimal
+    val taken: Double,
+    val left: Double
   )
 
 
-  class MatchResult(val filled: BigDecimal, val matches: List<Match>)
-  class Match(val id: String, val left: BigDecimal)
-  data class QuantityMatch(val id: String, val index: Int, val taken: BigDecimal, val left: BigDecimal)
+  class MatchResult(val filled: Double, val matches: List<Match>)
+  class Match(val id: String, val left: Double)
+  data class QuantityMatch(val id: String, val index: Int, val taken: Double, val left: Double)
 
   //Have to make state mutable
   class LimitOrderBook(
     val currencyPair: CurrencyPair,
-    val bids: TreeMap<BigDecimal, MutableList<Bid>> = TreeMap(HighLowPriceComparator()),
-    val asks: TreeMap<BigDecimal, MutableList<Ask>> = TreeMap(LowHighPriceComparator()),
+    val bids: TreeMap<Double, MutableList<Bid>> = TreeMap(HighLowPriceComparator()),
+    val asks: TreeMap<Double, MutableList<Ask>> = TreeMap(LowHighPriceComparator()),
     val trades: MutableList<LimitOrderTrade> = mutableListOf()
   )
 
-  class HighLowPriceComparator : Comparator<BigDecimal> {
-    override fun compare(left: BigDecimal, right: BigDecimal): Int {
+  class HighLowPriceComparator : Comparator<Double> {
+    override fun compare(left: Double, right: Double): Int {
 
       if (left.compareTo(right) == 0)
         return 0;
 
-      if (left.compareTo(right) == -1)
-        return -1;
+      if (left.compareTo(right) < 1)
+        return 1;
 
-      return 1;
+      return -1;
     }
   }
 
-  class LowHighPriceComparator : Comparator<BigDecimal> {
-    override fun compare(left: BigDecimal, right: BigDecimal): Int {
+  class LowHighPriceComparator : Comparator<Double> {
+    override fun compare(left: Double, right: Double): Int {
 
       if (left.compareTo(right) == 0) {
         return 0
@@ -84,12 +85,6 @@ object DataTypes {
 
       return 1;
     }
-  }
-
-  private val decimalFormat = DecimalFormat("#.#####", DecimalFormatSymbols(Locale.ENGLISH))
-
-  fun Double.toDecimalPlaces(): Double {
-    return decimalFormat.format(this).toDouble()
   }
 
   enum class CurrencyPair {
@@ -115,8 +110,8 @@ object DataTypes {
 
   class Order(
     val side: Side,
-    val quantity: BigDecimal,
-    val price: BigDecimal,
+    val quantity: Double,
+    val price: Double,
     val currencyPair: CurrencyPair,
     val timeInForce: TimeInForce = TimeInForce.GTC,
     val account: Trader,
@@ -127,8 +122,8 @@ object DataTypes {
 
   data class Bid(
     val bidId: OrderId,
-    val quantity: BigDecimal,
-    val price: BigDecimal,
+    val quantity: Double,
+    val price: Double,
     val currencyPair: CurrencyPair,
     val timeInForce: TimeInForce = TimeInForce.GTC,
     val timestamp: Long = Clock.systemUTC().millis(),
@@ -140,8 +135,8 @@ object DataTypes {
 
   data class Ask(
     val askId: OrderId,
-    val quantity: BigDecimal,
-    val price: BigDecimal,
+    val quantity: Double,
+    val price: Double,
     val currencyPair: CurrencyPair,
     val timeInForce: TimeInForce = TimeInForce.GTC,
     val timestamp: Long = Clock.systemUTC().millis(),

@@ -1,19 +1,26 @@
 package co.luckywolf.valr.exchange
 
-import arrow.core.*
-import arrow.core.Option.Companion.fromNullable
+import arrow.core.Either
+import arrow.core.Option
+import arrow.core.getOrElse
+import arrow.core.orElse
 import co.luckywolf.valr.exchange.Asks.matchAskToBids
 import co.luckywolf.valr.exchange.Bids.matchBidToAsks
-import co.luckywolf.valr.exchange.Bids.reshuffle
 import co.luckywolf.valr.protocol.DataTypes
 import co.luckywolf.valr.protocol.DataTypes.LimitOrderBook
 import co.luckywolf.valr.protocol.DataTypes.zero
-import java.math.BigDecimal
+import org.decimal4j.util.DoubleRounder
 import java.util.concurrent.atomic.AtomicLong
 
 object Trade {
 
   private val sequence: AtomicLong = AtomicLong(0L)
+
+
+
+  fun Double.toDecimalPlaces(decimalPlaces: Int = 6): Double {
+    return DoubleRounder.round(this, decimalPlaces)
+  }
 
   class TradeEngine(private val books: MutableMap<DataTypes.CurrencyPair, LimitOrderBook> = mutableMapOf()) {
 
@@ -33,8 +40,8 @@ object Trade {
 
   fun printBook(
     book: LimitOrderBook,
-    bid: (BigDecimal, DataTypes.Bid) -> Unit,
-    ask: (BigDecimal, DataTypes.Ask) -> Unit,
+    bid: (Double, DataTypes.Bid) -> Unit,
+    ask: (Double, DataTypes.Ask) -> Unit,
     trade: (DataTypes.LimitOrderTrade) -> Unit
   ) {
     book.bids.forEach { (t, u) ->
@@ -56,15 +63,15 @@ object Trade {
   }
 
   fun getQuantityOutstanding(
-    quantityRequired: BigDecimal,
+    quantityRequired: Double,
     quantityMatches: List<DataTypes.QuantityMatch>
-  ): BigDecimal {
-    return quantityRequired - quantityMatches.sumOf { it.taken }
+  ): Double {
+    return quantityRequired.minus(quantityMatches.sumOf { it.taken }).toDecimalPlaces()
   }
 
   fun takeAvailableQuantityOnOffer(
-    quantityRequired: BigDecimal,
-    quantityAvailable: BigDecimal
+    quantityRequired: Double,
+    quantityAvailable: Double
   ): DataTypes.QuantityTaken {
 
     return if (quantityRequired >= quantityAvailable) {

@@ -6,6 +6,7 @@ import co.luckywolf.valr.exchange.Bids.reshuffle
 import co.luckywolf.valr.exchange.Trade
 import co.luckywolf.valr.exchange.Trade.getQuantityOutstanding
 import co.luckywolf.valr.exchange.Trade.printBookToConsole
+import co.luckywolf.valr.exchange.Trade.toDecimalPlaces
 import co.luckywolf.valr.protocol.DataTypes
 import co.luckywolf.valr.protocol.DataTypes.zero
 import co.luckywolf.valr.trade.TestData.ask_0_55_R20
@@ -40,8 +41,8 @@ class BidTests {
       book,
       DataTypes.Order(
         DataTypes.Side.BID,
-        quantity = BigDecimal(100),
-        price = BigDecimal(20),
+        quantity = 100.toDouble().toDecimalPlaces(),
+        price = 20.toDouble().toDecimalPlaces(),
         currencyPair = DataTypes.CurrencyPair.BTCZAR,
         timeInForce = DataTypes.TimeInForce.GTC,
         account = DataTypes.Trader("333"),
@@ -65,16 +66,16 @@ class BidTests {
 
     //matches_a.forEach { println(it) }
 
-    Assertions.assertEquals(matches_a[0].taken, 10.toBigDecimal())
+    Assertions.assertEquals(matches_a[0].taken, 10.toDouble().toDecimalPlaces())
     Assertions.assertEquals(matches_a[0].left, zero)
     Assertions.assertEquals(matches_a[0].index, 0)
 
-    Assertions.assertEquals(matches_a[1].taken, 7.toBigDecimal())
-    Assertions.assertEquals(matches_a[1].left, 0.toBigDecimal())
+    Assertions.assertEquals(matches_a[1].taken, 7.toDouble().toDecimalPlaces())
+    Assertions.assertEquals(matches_a[1].left, 0.toDouble().toDecimalPlaces())
     Assertions.assertEquals(matches_a[1].index, 1)
 
-    Assertions.assertEquals(matches_a[2].taken, 33.toBigDecimal())
-    Assertions.assertEquals(matches_a[2].left, 167.toBigDecimal())
+    Assertions.assertEquals(matches_a[2].taken, 33.toDouble().toDecimalPlaces())
+    Assertions.assertEquals(matches_a[2].left, 167.toDouble().toDecimalPlaces())
     Assertions.assertEquals(matches_a[2].index, 2)
 
     Assertions.assertEquals(
@@ -90,7 +91,7 @@ class BidTests {
         )
       )
 
-    Assertions.assertEquals(matches_b[0].taken, 10.toBigDecimal())
+    Assertions.assertEquals(matches_b[0].taken, 10.toDouble().toDecimalPlaces())
     Assertions.assertEquals(matches_b[0].left, zero)
     Assertions.assertEquals(matches_b[0].index, 0)
 
@@ -107,16 +108,16 @@ class BidTests {
         )
       )
 
-    Assertions.assertEquals(matches_c[0].taken, 2.toBigDecimal())
+    Assertions.assertEquals(matches_c[0].taken, 2.toDouble().toDecimalPlaces())
     Assertions.assertEquals(matches_c[0].left, zero)
     Assertions.assertEquals(matches_c[0].index, 0)
 
-    Assertions.assertEquals(matches_c[0].taken, 2.toBigDecimal())
+    Assertions.assertEquals(matches_c[0].taken, 2.toDouble().toDecimalPlaces())
     Assertions.assertEquals(matches_c[0].left, zero)
     Assertions.assertEquals(matches_c[0].index, 0)
 
     Assertions.assertEquals(
-      getQuantityOutstanding(bid_10_at_R10.quantity, matches_c), 6.toBigDecimal()
+      getQuantityOutstanding(bid_10_at_R10.quantity, matches_c), 6.toDouble().toDecimalPlaces()
     )
 
   }
@@ -133,13 +134,13 @@ class BidTests {
         DataTypes.LimitOrderMatch(
           DataTypes.OrderId(id = "liverpool", sequence = 9),
           tradeSide = DataTypes.Side.BID,
-          price = 30.toBigDecimal(),
-          quantity = 49.toBigDecimal(),
+          price = 30.toDouble().toDecimalPlaces(),
+          quantity = 49.toDouble().toDecimalPlaces(),
           fillSide = DataTypes.Side.ASK,
-          fillPrice = 20.toBigDecimal(),
+          fillPrice = 20.toDouble().toDecimalPlaces(),
           quantityMatches = listOf(
-            DataTypes.QuantityMatch(ask_7_R20.askId.id, 0, 7.toBigDecimal(), 0.toBigDecimal()),
-            DataTypes.QuantityMatch(ask_30_R20.askId.id, 1, 30.toBigDecimal(), 0.toBigDecimal())
+            DataTypes.QuantityMatch(ask_7_R20.askId.id, 0, 7.toDouble().toDecimalPlaces(), 0.toDouble().toDecimalPlaces()),
+            DataTypes.QuantityMatch(ask_30_R20.askId.id, 1, 30.toDouble().toDecimalPlaces(), 0.toDouble().toDecimalPlaces())
           )
         )
       )
@@ -149,7 +150,7 @@ class BidTests {
     Assertions.assertEquals(2, book.trades.size)
     Assertions.assertEquals(0, book.asks.size)
 
-    Assertions.assertEquals(12.toBigDecimal(), book.bids[bid_49_at_R30.price]!![0].quantity)
+    Assertions.assertEquals(12.toDouble().toDecimalPlaces(), book.bids[bid_49_at_R30.price]!![0].quantity)
     Assertions.assertEquals("liverpool", book.bids[bid_49_at_R30.price]!![0].bidId.id)
     Assertions.assertEquals("liverpool", book.trades[0].orderId.id)
     Assertions.assertEquals("liverpool", book.trades[1].orderId.id)
@@ -171,12 +172,12 @@ class BidTests {
         DataTypes.LimitOrderMatch(
           DataTypes.OrderId(id = "liverpool", sequence = 9),
           tradeSide = DataTypes.Side.BID,
-          price = 10.toBigDecimal(),
-          quantity = 10.toBigDecimal(),
+          price = 10.toDouble().toDecimalPlaces(),
+          quantity = 10.toDouble().toDecimalPlaces(),
           fillSide = DataTypes.Side.ASK,
-          fillPrice = 8.toBigDecimal(),
+          fillPrice = 8.toDouble().toDecimalPlaces(),
           quantityMatches = listOf(
-            DataTypes.QuantityMatch(ask_3_R8.askId.id, 0, 3.toBigDecimal(), 0.toBigDecimal()),
+            DataTypes.QuantityMatch(ask_3_R8.askId.id, 0, 3.toDouble().toDecimalPlaces(), 0.toDouble().toDecimalPlaces()),
           )
         )
       )
@@ -187,8 +188,8 @@ class BidTests {
     Assertions.assertEquals(1, book.trades.size)
     Assertions.assertEquals(1, book.asks.size)
 
-    Assertions.assertEquals(7.toBigDecimal(), book.bids[bid_10_at_R10.price]!![0].quantity)
-    Assertions.assertEquals(3.toBigDecimal(), book.trades[0].fillQuantity.taken)
+    Assertions.assertEquals(7.toDouble().toDecimalPlaces(), book.bids[bid_10_at_R10.price]!![0].quantity)
+    Assertions.assertEquals(3.toDouble().toDecimalPlaces(), book.trades[0].fillQuantity.taken)
   }
 
   @Test
@@ -207,13 +208,13 @@ class BidTests {
         DataTypes.LimitOrderMatch(
           DataTypes.OrderId(id = "liverpool", sequence = 9),
           tradeSide = DataTypes.Side.BID,
-          price = 30.toBigDecimal(),
-          quantity = 49.toBigDecimal(),
+          price = 30.toDouble().toDecimalPlaces(),
+          quantity = 49.toDouble().toDecimalPlaces(),
           fillSide = DataTypes.Side.ASK,
-          fillPrice = 20.toBigDecimal(),
+          fillPrice = 20.toDouble().toDecimalPlaces(),
           quantityMatches = listOf(
-            DataTypes.QuantityMatch(ask_7_R20.askId.id, 0, 7.toBigDecimal(), 0.toBigDecimal()),
-            DataTypes.QuantityMatch(ask_30_R20.askId.id, 1, 30.toBigDecimal(), 0.toBigDecimal())
+            DataTypes.QuantityMatch(ask_7_R20.askId.id, 0, 7.toDouble().toDecimalPlaces(), 0.toDouble().toDecimalPlaces()),
+            DataTypes.QuantityMatch(ask_30_R20.askId.id, 1, 30.toDouble().toDecimalPlaces(), 0.toDouble().toDecimalPlaces())
           )
         )
       )
@@ -225,12 +226,12 @@ class BidTests {
 
     //book.bids.higherEntry(bidPrice)
 
-    Assertions.assertEquals(12.toBigDecimal(), book.bids[bid_49_at_R30.price]!![0].quantity)
+    Assertions.assertEquals(12.toDouble().toDecimalPlaces(), book.bids[bid_49_at_R30.price]!![0].quantity)
     Assertions.assertEquals("liverpool", book.bids[bid_49_at_R30.price]!![0].bidId.id)
 
 
-    Assertions.assertEquals(10.toBigDecimal(), book.bids[bid_10_at_R10.price]!![0].quantity)
-    Assertions.assertEquals(10.toBigDecimal(), book.bids[bid_10_at_R10.price]!![0].price)
+    Assertions.assertEquals(10.toDouble().toDecimalPlaces(), book.bids[bid_10_at_R10.price]!![0].quantity)
+    Assertions.assertEquals(10.toDouble().toDecimalPlaces(), book.bids[bid_10_at_R10.price]!![0].price)
 
     Assertions.assertEquals("liverpool", book.trades[0].orderId.id)
     Assertions.assertEquals("liverpool", book.trades[1].orderId.id)
@@ -249,10 +250,10 @@ class BidTests {
         DataTypes.LimitOrderMatch(
           DataTypes.OrderId(id = "liverpool", sequence = 9),
           tradeSide = DataTypes.Side.BID,
-          price = 30.toBigDecimal(),
-          quantity = 49.toBigDecimal(),
+          price = 30.toDouble().toDecimalPlaces(),
+          quantity = 49.toDouble().toDecimalPlaces(),
           fillSide = DataTypes.Side.ASK,
-          fillPrice = 0.toBigDecimal(),
+          fillPrice = 0.toDouble().toDecimalPlaces(),
           quantityMatches = listOf()
         )
       )
@@ -262,7 +263,7 @@ class BidTests {
     Assertions.assertEquals(0, book.trades.size)
     Assertions.assertEquals(0, book.asks.size)
 
-    Assertions.assertEquals(49.toBigDecimal(), book.bids[bid_49_at_R30.price]!![0].quantity)
+    Assertions.assertEquals(49.toDouble().toDecimalPlaces(), book.bids[bid_49_at_R30.price]!![0].quantity)
 
     printBookToConsole(book)
   }
@@ -285,9 +286,9 @@ class BidTests {
           price = bid_29_at_R26.price,
           quantity = bid_29_at_R26.quantity,
           fillSide = DataTypes.Side.ASK,
-          fillPrice = 20.toBigDecimal(),
+          fillPrice = 20.toDouble().toDecimalPlaces(),
           quantityMatches = listOf(
-            DataTypes.QuantityMatch(ask_7_R20.askId.id, 0, 7.toBigDecimal(), 0.toBigDecimal())
+            DataTypes.QuantityMatch(ask_7_R20.askId.id, 0, 7.toDouble().toDecimalPlaces(), 0.toDouble().toDecimalPlaces())
           )
         ),
         DataTypes.LimitOrderMatch(
@@ -296,9 +297,9 @@ class BidTests {
           price = bid_29_at_R26.price,
           quantity = bid_29_at_R26.quantity,
           fillSide = DataTypes.Side.ASK,
-          fillPrice = 22.toBigDecimal(),
+          fillPrice = 22.toDouble().toDecimalPlaces(),
           quantityMatches = listOf(
-            DataTypes.QuantityMatch(ask_22_at_R22.askId.id, 0, 22.toBigDecimal(), 0.toBigDecimal())
+            DataTypes.QuantityMatch(ask_22_at_R22.askId.id, 0, 22.toDouble().toDecimalPlaces(), 0.toDouble().toDecimalPlaces())
           )
         )
       )
@@ -331,21 +332,21 @@ class BidTests {
     Assertions.assertEquals(2, matches_a[0].quantityMatches.size)
 
     Assertions.assertEquals(0, matches_a[0].quantityMatches[0].index)
-    Assertions.assertEquals(7.toBigDecimal(), matches_a[0].quantityMatches[0].taken)
+    Assertions.assertEquals(7.toDouble().toDecimalPlaces(), matches_a[0].quantityMatches[0].taken)
     Assertions.assertEquals(zero, matches_a[0].quantityMatches[0].left)
 
     Assertions.assertEquals(1, matches_a[0].quantityMatches[1].index)
-    Assertions.assertEquals(30.toBigDecimal(), matches_a[0].quantityMatches[1].taken)
+    Assertions.assertEquals(30.toDouble().toDecimalPlaces(), matches_a[0].quantityMatches[1].taken)
     Assertions.assertEquals(zero, matches_a[0].quantityMatches[1].left)
 
     Assertions.assertEquals(1, matches_a[1].quantityMatches.size)
 
     Assertions.assertEquals(0, matches_a[1].quantityMatches[0].index)
-    Assertions.assertEquals(12.toBigDecimal(), matches_a[1].quantityMatches[0].taken)
-    Assertions.assertEquals(10.toBigDecimal(), matches_a[1].quantityMatches[0].left)
+    Assertions.assertEquals(12.toDouble().toDecimalPlaces(), matches_a[1].quantityMatches[0].taken)
+    Assertions.assertEquals(10.toDouble().toDecimalPlaces(), matches_a[1].quantityMatches[0].left)
 
     Assertions.assertEquals(
-      zero, getQuantityOutstanding(49.toBigDecimal(),
+      zero, getQuantityOutstanding(49.toDouble().toDecimalPlaces(),
         matches_a.flatMap { it.quantityMatches })
     )
 
@@ -360,11 +361,11 @@ class BidTests {
     val matches_a = matchBidToAsks(book, bid_14_at_R25)
 
     Assertions.assertEquals(0, matches_a[1].quantityMatches[0].index)
-    Assertions.assertEquals(4.toBigDecimal(), matches_a[1].quantityMatches[0].taken)
-    Assertions.assertEquals(3.toBigDecimal(), matches_a[1].quantityMatches[0].left)
+    Assertions.assertEquals(4.toDouble().toDecimalPlaces(), matches_a[1].quantityMatches[0].taken)
+    Assertions.assertEquals(3.toDouble().toDecimalPlaces(), matches_a[1].quantityMatches[0].left)
 
     Assertions.assertEquals(
-      0.toBigDecimal(), getQuantityOutstanding(14.toBigDecimal(),
+      0.toDouble().toDecimalPlaces(), getQuantityOutstanding(14.toDouble().toDecimalPlaces(),
         matches_a.flatMap { it.quantityMatches })
     )
 
@@ -384,11 +385,11 @@ class BidTests {
     Assertions.assertEquals(1, matches_a[0].quantityMatches.size)
 
     Assertions.assertEquals(0, matches_a[0].quantityMatches[0].index)
-    Assertions.assertEquals(5.toBigDecimal(), matches_a[0].quantityMatches[0].taken)
+    Assertions.assertEquals(5.toDouble().toDecimalPlaces(), matches_a[0].quantityMatches[0].taken)
     Assertions.assertEquals(zero, matches_a[0].quantityMatches[0].left)
 
     Assertions.assertEquals(
-      5.toBigDecimal(), getQuantityOutstanding(10.toBigDecimal(),
+      5.toDouble().toDecimalPlaces(), getQuantityOutstanding(10.toDouble().toDecimalPlaces(),
         matches_a.flatMap { it.quantityMatches })
     )
   }
@@ -408,7 +409,7 @@ class BidTests {
     Assertions.assertEquals(1, matches_a[0].quantityMatches.size)
 
     Assertions.assertEquals(
-      zero, getQuantityOutstanding(5.toBigDecimal(),
+      zero, getQuantityOutstanding(5.toDouble().toDecimalPlaces(),
         matches_a.flatMap { it.quantityMatches })
     )
   }
@@ -425,7 +426,7 @@ class BidTests {
     Assertions.assertEquals(0, matches_a.size)
 
     Assertions.assertEquals(
-      10.toBigDecimal(), getQuantityOutstanding(10.toBigDecimal(),
+      10.toDouble().toDecimalPlaces(), getQuantityOutstanding(10.toDouble().toDecimalPlaces(),
         matches_a.flatMap { it.quantityMatches })
     )
   }
@@ -442,7 +443,7 @@ class BidTests {
     Assertions.assertEquals(0, matches_a.size)
 
     Assertions.assertEquals(
-      10.toBigDecimal(), getQuantityOutstanding(10.toBigDecimal(),
+      10.toDouble().toDecimalPlaces(), getQuantityOutstanding(10.toDouble().toDecimalPlaces(),
         matches_a.flatMap { it.quantityMatches })
     )
   }
@@ -458,7 +459,7 @@ class BidTests {
     Assertions.assertEquals(0, matches_a.size)
 
     Assertions.assertEquals(
-      10.toBigDecimal(), getQuantityOutstanding(10.toBigDecimal(),
+      10.toDouble().toDecimalPlaces(), getQuantityOutstanding(10.toDouble().toDecimalPlaces(),
         matches_a.flatMap { it.quantityMatches })
     )
   }
