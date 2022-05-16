@@ -10,13 +10,47 @@ import org.junit.jupiter.api.Test
 class ApiKeyTests {
 
   @Test
-  fun generate_request() {
+  fun generate_trade_history_sig() {
     val hmac = Crypto.Hmac512.default()
     val sign = hmac.sign(
       apiKeySecret = "4961b74efac86b25cce8fbe4c9811c4c7a787b7a5996660afcc2e287ad864363".toByteArray(),
       timestamp = "1560007630778",
       verb = "GET",
       path = "/v1/marketdata/BTCZAR/tradehistory"
+    )
+    println(
+      Hex.encodeHexString(sign)
+    )
+
+    val currencyPair = DataTypes.CurrencyPair.valueOf("BTCZAR")
+    println(currencyPair)
+  }
+
+  @Test
+  fun generate_order_book_sig() {
+    val hmac = Crypto.Hmac512.default()
+    val sign = hmac.sign(
+      apiKeySecret = "4961b74efac86b25cce8fbe4c9811c4c7a787b7a5996660afcc2e287ad864363".toByteArray(),
+      timestamp = "1560007630778",
+      verb = "GET",
+      path = "/v1/marketdata/BTCZAR/orderbook"
+    )
+    println(
+      Hex.encodeHexString(sign)
+    )
+
+    val currencyPair = DataTypes.CurrencyPair.valueOf("BTCZAR")
+    println(currencyPair)
+  }
+
+  @Test
+  fun generate_order_sig() {
+    val hmac = Crypto.Hmac512.default()
+    val sign = hmac.sign(
+      apiKeySecret = "4961b74efac86b25cce8fbe4c9811c4c7a787b7a5996660afcc2e287ad864363".toByteArray(),
+      timestamp = "1560007630778",
+      verb = "POST",
+      path = "/v1/orders/limit"
     )
     println(
       Hex.encodeHexString(sign)

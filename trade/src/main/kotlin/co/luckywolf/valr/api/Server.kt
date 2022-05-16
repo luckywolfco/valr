@@ -143,9 +143,9 @@ class ApiVerticle() : AbstractVerticle() {
           val trades: List<JsonObject> = getTradesFor(limitOrderBook, r.skip, r.limit).map { trade ->
             JsonObject()
               .put("price", trade.fillPrice.toString())
-              .put("quantity", trade.fillQuantity.toString())
+              .put("quantity", trade.fillQuantity.taken.toString())
               .put("currencyPair", r.currencyPair.toString().uppercase())
-              .put("tradedAt", DateTime(trade.timestamp.toString()))
+              .put("tradedAt", DateTime(trade.timestamp).toString()) //use utc in live
               .put("takerSide", trade.fillSide.toString().lowercase())
               .put("sequenceId", trade.tradeId.sequence.toString())
               .put("id", trade.tradeId.id)
@@ -199,7 +199,7 @@ class ApiVerticle() : AbstractVerticle() {
             )
           ).map {
 
-            rc.response().setStatusCode(200)
+            rc.response().setStatusCode(202)
               .end(JsonObject().put("id", it.id).toBuffer())
 
           }.mapLeft {

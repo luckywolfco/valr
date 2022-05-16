@@ -16,8 +16,6 @@ object Trade {
 
   private val sequence: AtomicLong = AtomicLong(0L)
 
-
-
   fun Double.toDecimalPlaces(decimalPlaces: Int = 6): Double {
     return DoubleRounder.round(this, decimalPlaces)
   }

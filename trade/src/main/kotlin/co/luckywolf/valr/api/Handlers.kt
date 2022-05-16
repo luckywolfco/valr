@@ -68,7 +68,7 @@ class ApiKeyAuthenticationHandler(private val accounts: () -> Map<String, DataTy
             path = request.path(),
             body =
             if (request.method() == HttpMethod.GET) none()
-            else Option(request.body().toString())
+            else none() //Option(request.body().toString()) --> live would sign the body of the request
           )
 
           when (it.signature) {
