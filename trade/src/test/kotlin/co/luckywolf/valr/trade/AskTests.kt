@@ -6,7 +6,6 @@ import co.luckywolf.valr.exchange.Asks.reshuffle
 import co.luckywolf.valr.exchange.Trade
 import co.luckywolf.valr.exchange.Trade.getQuantityOutstanding
 import co.luckywolf.valr.exchange.Trade.printBookToConsole
-import co.luckywolf.valr.exchange.Trade.toDecimalPlaces
 import co.luckywolf.valr.protocol.DataTypes
 import co.luckywolf.valr.protocol.DataTypes.zero
 import co.luckywolf.valr.trade.TestData.ask_100_at_R100
@@ -39,12 +38,12 @@ class AskTests {
 
   @Test
   fun double() {
-    val left = 0.5.toDecimalPlaces()
-    val right = 0.0.toDecimalPlaces()
+    val left = 0.5.toBigDecimal()
+    val right = 0.0.toBigDecimal()
     Assertions.assertEquals(1,DataTypes.LowHighPriceComparator().compare(left,right))
     Assertions.assertEquals(-1,DataTypes.LowHighPriceComparator().compare(right,left))
 
-    val one = 0.666666.toDecimalPlaces().minus(0.333.toDecimalPlaces())
+    val one = 0.666666.toBigDecimal().minus(0.333.toBigDecimal())
 
     val format = DecimalFormat("#.######").apply {
       isParseBigDecimal = true
@@ -53,8 +52,8 @@ class AskTests {
    val d = "0.0002".toBigDecimal()
    val s2 =  "0.0002".toBigDecimal()
     println(d+s2)
-    val s = format.parse("0.2").toDouble()
-    println(s)
+    //val s = format.parse("0.2").toBigDecimal()
+    //println(s)
     //println(one)
 
   }
@@ -67,8 +66,8 @@ class AskTests {
       book,
       DataTypes.Order(
         DataTypes.Side.ASK,
-        quantity = 0.50000.toDecimalPlaces(),
-        price = 0.50000.toDecimalPlaces(),
+        quantity = 0.50000.toBigDecimal(),
+        price = 0.50000.toBigDecimal(),
         currencyPair = DataTypes.CurrencyPair.BTCZAR,
         timeInForce = DataTypes.TimeInForce.GTC,
         account = DataTypes.Trader("333"),
@@ -78,8 +77,8 @@ class AskTests {
       book,
       DataTypes.Order(
         DataTypes.Side.ASK,
-        quantity = 0.45.toDecimalPlaces(),
-        price = 0.45.toDecimalPlaces(),
+        quantity = 0.45.toBigDecimal(),
+        price = 0.45.toBigDecimal(),
         currencyPair = DataTypes.CurrencyPair.BTCZAR,
         timeInForce = DataTypes.TimeInForce.GTC,
         account = DataTypes.Trader("333"),
@@ -92,8 +91,8 @@ class AskTests {
       book,
       DataTypes.Order(
         DataTypes.Side.ASK,
-        quantity = 0.42.toDecimalPlaces(),
-        price = 0.42.toDecimalPlaces(),
+        quantity = 0.42.toBigDecimal(),
+        price = 0.42.toBigDecimal(),
         currencyPair = DataTypes.CurrencyPair.BTCZAR,
         timeInForce = DataTypes.TimeInForce.GTC,
         account = DataTypes.Trader("333"),
@@ -106,8 +105,8 @@ class AskTests {
       book,
       DataTypes.Order(
         DataTypes.Side.BID,
-        quantity = 0.30.toDecimalPlaces(),
-        price = 0.42.toDecimalPlaces(),
+        quantity = 0.30.toBigDecimal(),
+        price = 0.42.toBigDecimal(),
         currencyPair = DataTypes.CurrencyPair.BTCZAR,
         timeInForce = DataTypes.TimeInForce.GTC,
         account = DataTypes.Trader("333"),
@@ -115,17 +114,17 @@ class AskTests {
     )
 
     //match 0.42 bid to 0.42 ask. match 0.30 with 0.12 left
-    Assertions.assertEquals(0.12.toDouble(), book.asks[0.42]!![0].quantity)
-    Assertions.assertEquals(0.42.toDouble(), book.asks[0.42]!![0].price)
-    Assertions.assertEquals(0.30.toDouble(), book.trades[0].fillQuantity.taken)
-    Assertions.assertEquals(0.12.toDouble(), book.trades[0].fillQuantity.left)
+    Assertions.assertEquals(0.12.toBigDecimal(), book.asks[0.42.toBigDecimal()]!![0].quantity)
+    Assertions.assertEquals(0.42.toBigDecimal(), book.asks[0.42.toBigDecimal()]!![0].price)
+    Assertions.assertEquals(0.30.toBigDecimal(), book.trades[0].fillQuantity.taken)
+    Assertions.assertEquals(0.12.toBigDecimal(), book.trades[0].fillQuantity.left)
 
     Trade.tryPlaceOrderFor(
       book,
       DataTypes.Order(
         DataTypes.Side.BID,
-        quantity = 0.20.toDecimalPlaces(),
-        price = 0.45.toDecimalPlaces(),
+        quantity = 0.20.toBigDecimal(),
+        price = 0.45.toBigDecimal(),
         currencyPair = DataTypes.CurrencyPair.BTCZAR,
         timeInForce = DataTypes.TimeInForce.GTC,
         account = DataTypes.Trader("333"),
@@ -136,14 +135,13 @@ class AskTests {
 
     Assertions.assertEquals(2,book.asks.size)
     Assertions.assertEquals(3,book.trades.size)
-    Assertions.assertEquals(0.12.toDouble(), book.trades[1].fillQuantity.taken)
-    Assertions.assertEquals(0.toDouble(), book.trades[1].fillQuantity.left)
+    Assertions.assertEquals(0.12.toBigDecimal(), book.trades[1].fillQuantity.taken)
+    Assertions.assertEquals(0.toBigDecimal(), book.trades[1].fillQuantity.left)
 
     //match 0.45 (0.38) bid to 0.45 ask. match 0.20 with 0 left
-    Assertions.assertEquals(0.08.toDouble(), book.trades[2].fillQuantity.taken)
-    Assertions.assertEquals(0.45.minus(0.08).toDouble(), book.trades[2].fillQuantity.left)
-    Assertions.assertEquals(0.45.minus(0.08).toDouble(), book.asks[0.45]!![0].quantity)
-    Assertions.assertEquals(0,book.bids.size)
+    Assertions.assertEquals(0.08.toBigDecimal(), book.trades[2].fillQuantity.taken)
+    Assertions.assertEquals(0.45.minus(0.08).toBigDecimal(), book.trades[2].fillQuantity.left)
+    Assertions.assertEquals(0.45.minus(0.08).toBigDecimal(), book.asks[0.45.toBigDecimal()]!![0].quantity)
 
 
     printBookToConsole(book)
@@ -165,16 +163,16 @@ class AskTests {
 
     //matches_a.forEach { println(it) }
 
-    Assertions.assertEquals(matches_a[0].taken, 10.toDouble())
+    Assertions.assertEquals(matches_a[0].taken, 10.toBigDecimal())
     Assertions.assertEquals(matches_a[0].left, zero)
     Assertions.assertEquals(matches_a[0].index, 0)
 
-    Assertions.assertEquals(matches_a[1].taken, 7.toDouble())
-    Assertions.assertEquals(matches_a[1].left, 0.toDouble())
+    Assertions.assertEquals(matches_a[1].taken, 7.toBigDecimal())
+    Assertions.assertEquals(matches_a[1].left, 0.toBigDecimal())
     Assertions.assertEquals(matches_a[1].index, 1)
 
-    Assertions.assertEquals(matches_a[2].taken, 33.toDouble())
-    Assertions.assertEquals(matches_a[2].left, 167.toDouble())
+    Assertions.assertEquals(matches_a[2].taken, 33.toBigDecimal())
+    Assertions.assertEquals(matches_a[2].left, 167.toBigDecimal())
     Assertions.assertEquals(matches_a[2].index, 2)
 
     Assertions.assertEquals(
@@ -199,10 +197,10 @@ class AskTests {
           price = ask_49_at_R20.price,
           quantity = ask_49_at_R20.quantity,
           fillSide = DataTypes.Side.BID,
-          fillPrice = 20.toDouble(),
+          fillPrice = 20.toBigDecimal(),
           quantityMatches = listOf(
-            DataTypes.QuantityMatch(bid_7_R20.bidId.id, 0, 7.toDouble(), 0.toDouble()),
-            DataTypes.QuantityMatch(bid_30_R20.bidId.id, 1, 30.toDouble(), 0.toDouble())
+            DataTypes.QuantityMatch(bid_7_R20.bidId.id, 0, 7.toBigDecimal(), 0.toBigDecimal()),
+            DataTypes.QuantityMatch(bid_30_R20.bidId.id, 1, 30.toBigDecimal(), 0.toBigDecimal())
           )
         )
       )
@@ -211,7 +209,7 @@ class AskTests {
     Assertions.assertEquals(2, book.trades.size)
     Assertions.assertEquals(1, book.asks.size)
 
-    Assertions.assertEquals(12.toDouble(), book.asks[ask_49_at_R20.price]!![0].quantity)
+    Assertions.assertEquals(12.toBigDecimal(), book.asks[ask_49_at_R20.price]!![0].quantity)
     Assertions.assertEquals(bid_7_R20.quantity, book.trades[0].fillQuantity.taken)
     Assertions.assertEquals(bid_30_R20.quantity, book.trades[1].fillQuantity.taken)
     printBookToConsole(book)
@@ -234,9 +232,9 @@ class AskTests {
           price = ask_5_R5.price,
           quantity = ask_5_R5.quantity,
           fillSide = DataTypes.Side.BID,
-          fillPrice = 26.toDouble(),
+          fillPrice = 26.toBigDecimal(),
           quantityMatches = listOf(
-            DataTypes.QuantityMatch(bid_24_at_R26.bidId.id, 0, 5.toDouble(), 19.toDouble())
+            DataTypes.QuantityMatch(bid_24_at_R26.bidId.id, 0, 5.toBigDecimal(), 19.toBigDecimal())
           )
         )
       )
@@ -246,10 +244,10 @@ class AskTests {
     Assertions.assertEquals(1, book.trades.size)
     Assertions.assertEquals(1, book.asks.size)
 
-    Assertions.assertEquals(19.toDouble(), book.bids[bid_24_at_R26.price]!![0].quantity)
+    Assertions.assertEquals(19.toBigDecimal(), book.bids[bid_24_at_R26.price]!![0].quantity)
 
-    Assertions.assertEquals(10.toDouble(), book.bids[bid_10_at_R10.price]!![0].quantity)
-    Assertions.assertEquals(10.toDouble(), book.bids[bid_10_at_R10.price]!![0].price)
+    Assertions.assertEquals(10.toBigDecimal(), book.bids[bid_10_at_R10.price]!![0].quantity)
+    Assertions.assertEquals(10.toBigDecimal(), book.bids[bid_10_at_R10.price]!![0].price)
 
 
     printBookToConsole(book)
@@ -267,10 +265,10 @@ class AskTests {
         DataTypes.LimitOrderMatch(
           DataTypes.OrderId(id = "liverpool", sequence = 9),
           tradeSide = DataTypes.Side.ASK,
-          price = 30.toDouble(),
-          quantity = 49.toDouble(),
+          price = 30.toBigDecimal(),
+          quantity = 49.toBigDecimal(),
           fillSide = DataTypes.Side.ASK,
-          fillPrice = 0.toDouble(),
+          fillPrice = 0.toBigDecimal(),
           quantityMatches = listOf()
         )
       )
@@ -280,7 +278,7 @@ class AskTests {
     Assertions.assertEquals(0, book.trades.size)
     Assertions.assertEquals(1, book.asks.size)
 
-    Assertions.assertEquals(49.toDouble(), book.asks[ask_49_at_R30.price]!![0].quantity)
+    Assertions.assertEquals(49.toBigDecimal(), book.asks[ask_49_at_R30.price]!![0].quantity)
 
     printBookToConsole(book)
   }
@@ -305,7 +303,7 @@ class AskTests {
           fillSide = DataTypes.Side.BID,
           fillPrice = bid_5_at_R90.price,
           quantityMatches = listOf(
-            DataTypes.QuantityMatch(bid_5_at_R90.bidId.id, 0, bid_5_at_R90.quantity, 0.toDouble())
+            DataTypes.QuantityMatch(bid_5_at_R90.bidId.id, 0, bid_5_at_R90.quantity, 0.toBigDecimal())
           )
         ),
         DataTypes.LimitOrderMatch(
@@ -316,7 +314,7 @@ class AskTests {
           fillSide = DataTypes.Side.BID,
           fillPrice = bid_24_at_R26.price,
           quantityMatches = listOf(
-            DataTypes.QuantityMatch(bid_24_at_R26.bidId.id, 0, bid_24_at_R26.quantity, 0.toDouble())
+            DataTypes.QuantityMatch(bid_24_at_R26.bidId.id, 0, bid_24_at_R26.quantity, 0.toBigDecimal())
           )
         )
       )
@@ -330,7 +328,7 @@ class AskTests {
     Assertions.assertEquals("liverpool", book.trades[0].orderId.id)
     Assertions.assertEquals("liverpool", book.trades[1].orderId.id)
 
-    Assertions.assertEquals(7.toDouble(), book.bids[20.toDouble()]!![0].quantity)
+    Assertions.assertEquals(7.toBigDecimal(), book.bids[20.toBigDecimal()]!![0].quantity)
 
     printBookToConsole(book)
   }
@@ -355,22 +353,22 @@ class AskTests {
     Assertions.assertEquals(2, matches_a[0].quantityMatches.size)
 
     Assertions.assertEquals(0, matches_a[0].quantityMatches[0].index)
-    Assertions.assertEquals(2.toDouble(), matches_a[0].quantityMatches[0].taken)
+    Assertions.assertEquals(2.toBigDecimal(), matches_a[0].quantityMatches[0].taken)
     Assertions.assertEquals(zero, matches_a[0].quantityMatches[0].left)
 
     Assertions.assertEquals(1, matches_a[0].quantityMatches[1].index)
-    Assertions.assertEquals(2.toDouble(), matches_a[0].quantityMatches[1].taken)
+    Assertions.assertEquals(2.toBigDecimal(), matches_a[0].quantityMatches[1].taken)
     Assertions.assertEquals(zero, matches_a[0].quantityMatches[1].left)
 
     Assertions.assertEquals(1, matches_a[1].quantityMatches.size)
 
     Assertions.assertEquals(0, matches_a[1].quantityMatches[0].index)
-    Assertions.assertEquals(10.toDouble(), matches_a[1].quantityMatches[0].taken)
-    Assertions.assertEquals(2.toDouble(), matches_a[1].quantityMatches[0].left)
+    Assertions.assertEquals(10.toBigDecimal(), matches_a[1].quantityMatches[0].taken)
+    Assertions.assertEquals(2.toBigDecimal(), matches_a[1].quantityMatches[0].left)
 
     Assertions.assertEquals(
       zero,
-      getQuantityOutstanding(14.toDouble(),
+      getQuantityOutstanding(14.toBigDecimal(),
         matches_a.flatMap { it.quantityMatches })
     )
 
@@ -390,7 +388,7 @@ class AskTests {
     Assertions.assertEquals(1, matches_a[0].quantityMatches.size)
 
     Assertions.assertEquals(
-      50.toDouble(), getQuantityOutstanding(100.toDouble(),
+      50.toBigDecimal(), getQuantityOutstanding(100.toBigDecimal(),
         matches_a.flatMap { it.quantityMatches })
     )
   }
@@ -408,7 +406,7 @@ class AskTests {
     Assertions.assertEquals(0, matches_a.size)
 
     Assertions.assertEquals(
-      10.toDouble(), getQuantityOutstanding(10.toDouble(),
+      10.toBigDecimal(), getQuantityOutstanding(10.toBigDecimal(),
         matches_a.flatMap { it.quantityMatches })
     )
   }
@@ -424,7 +422,7 @@ class AskTests {
     Assertions.assertEquals(0, matches_a.size)
 
     Assertions.assertEquals(
-      10.toDouble(), getQuantityOutstanding(10.toDouble(),
+      10.toBigDecimal(), getQuantityOutstanding(10.toBigDecimal(),
         matches_a.flatMap { it.quantityMatches })
     )
   }

@@ -3,6 +3,7 @@ package co.luckywolf.valr.protocol
 import arrow.core.Option
 import arrow.core.none
 import org.decimal4j.util.DoubleRounder
+import java.math.BigDecimal
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.time.Clock
@@ -11,8 +12,8 @@ import java.util.*
 
 object DataTypes {
 
-  val zero = DoubleRounder.round(0.000000, 6)
-
+  //val zero = DoubleRounder.round(0.000000, 6)
+  val zero = 0.toBigDecimal()
 
   //match bid to ask
   //e.g. 100 to buy @ 10 - sell @100 @ 5
@@ -23,10 +24,10 @@ object DataTypes {
     val tradeId: OrderId,
     val tradeSide: Side,
     val account: Trader,
-    val price: Double,
-    val quantity: Double,
+    val price: BigDecimal,
+    val quantity: BigDecimal,
     val fillSide: Side,
-    val fillPrice: Double,
+    val fillPrice: BigDecimal,
     val fillQuantity: QuantityMatch,
     val timestamp: Long = Clock.systemUTC().millis(),
   )
@@ -34,34 +35,34 @@ object DataTypes {
   data class LimitOrderMatch(
     val orderId: OrderId,
     val tradeSide: Side,
-    val price: Double,
-    val quantity: Double,
+    val price: BigDecimal,
+    val quantity: BigDecimal,
     val fillSide: Side,
-    val fillPrice: Double,
+    val fillPrice: BigDecimal,
     val quantityMatches: List<QuantityMatch>,
     val timestamp: Long = Clock.systemUTC().millis(),
   )
 
   class QuantityTaken(
-    val taken: Double,
-    val left: Double
+    val taken: BigDecimal,
+    val left: BigDecimal
   )
 
 
-  class MatchResult(val filled: Double, val matches: List<Match>)
-  class Match(val id: String, val left: Double)
-  data class QuantityMatch(val id: String, val index: Int, val taken: Double, val left: Double)
+  class MatchResult(val filled: BigDecimal, val matches: List<Match>)
+  class Match(val id: String, val left: BigDecimal)
+  data class QuantityMatch(val id: String, val index: Int, val taken: BigDecimal, val left: BigDecimal)
 
   //Have to make state mutable
   class LimitOrderBook(
     val currencyPair: CurrencyPair,
-    val bids: TreeMap<Double, MutableList<Bid>> = TreeMap(HighLowPriceComparator()),
-    val asks: TreeMap<Double, MutableList<Ask>> = TreeMap(LowHighPriceComparator()),
+    val bids: TreeMap<BigDecimal, MutableList<Bid>> = TreeMap(HighLowPriceComparator()),
+    val asks: TreeMap<BigDecimal, MutableList<Ask>> = TreeMap(LowHighPriceComparator()),
     val trades: MutableList<LimitOrderTrade> = mutableListOf()
   )
 
-  class HighLowPriceComparator : Comparator<Double> {
-    override fun compare(left: Double, right: Double): Int {
+  class HighLowPriceComparator : Comparator<BigDecimal> {
+    override fun compare(left: BigDecimal, right: BigDecimal): Int {
 
       if (left.compareTo(right) == 0)
         return 0;
@@ -73,8 +74,8 @@ object DataTypes {
     }
   }
 
-  class LowHighPriceComparator : Comparator<Double> {
-    override fun compare(left: Double, right: Double): Int {
+  class LowHighPriceComparator : Comparator<BigDecimal> {
+    override fun compare(left: BigDecimal, right: BigDecimal): Int {
 
       if (left.compareTo(right) == 0) {
         return 0
@@ -110,8 +111,8 @@ object DataTypes {
 
   class Order(
     val side: Side,
-    val quantity: Double,
-    val price: Double,
+    val quantity: BigDecimal,
+    val price: BigDecimal,
     val currencyPair: CurrencyPair,
     val timeInForce: TimeInForce = TimeInForce.GTC,
     val account: Trader,
@@ -122,8 +123,8 @@ object DataTypes {
 
   data class Bid(
     val bidId: OrderId,
-    val quantity: Double,
-    val price: Double,
+    val quantity: BigDecimal,
+    val price: BigDecimal,
     val currencyPair: CurrencyPair,
     val timeInForce: TimeInForce = TimeInForce.GTC,
     val timestamp: Long = Clock.systemUTC().millis(),
@@ -135,8 +136,8 @@ object DataTypes {
 
   data class Ask(
     val askId: OrderId,
-    val quantity: Double,
-    val price: Double,
+    val quantity: BigDecimal,
+    val price: BigDecimal,
     val currencyPair: CurrencyPair,
     val timeInForce: TimeInForce = TimeInForce.GTC,
     val timestamp: Long = Clock.systemUTC().millis(),

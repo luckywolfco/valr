@@ -2,8 +2,9 @@ package co.luckywolf.valr.exchange
 
 import arrow.core.Option
 import arrow.core.Some
-import co.luckywolf.valr.exchange.Trade.toDecimalPlaces
 import co.luckywolf.valr.protocol.DataTypes
+import co.luckywolf.valr.protocol.DataTypes.zero
+import java.math.BigDecimal
 import java.util.concurrent.atomic.AtomicLong
 
 object Bids {
@@ -12,7 +13,7 @@ object Bids {
 
   //match the bid to a single ask
   fun matchBidQuantityToAskQuantities(
-    quantityRequired: Double,
+    quantityRequired: BigDecimal,
     asks: List<DataTypes.Ask>,
   ): List<DataTypes.QuantityMatch> {
 
@@ -20,11 +21,11 @@ object Bids {
 
     tailrec fun match(
       n: Int,
-      remainingRequired: Double,
+      remainingRequired: BigDecimal,
     ): List<DataTypes.QuantityMatch> {
 
       when {
-        remainingRequired.compareTo(DataTypes.zero) == 0 -> return quantityMatches
+        remainingRequired == zero -> return quantityMatches
         n >= asks.size -> return quantityMatches
         else -> {
           val taken = Trade.takeAvailableQuantityOnOffer(
@@ -41,7 +42,7 @@ object Bids {
             )
           )
 
-          return match(n + 1, (remainingRequired - taken.taken).toDecimalPlaces())
+          return match(n + 1, (remainingRequired - taken.taken))
         }
       }
     }
@@ -60,17 +61,16 @@ object Bids {
 
     fun match(
       n: Int,
-      askPrice: Double,
+      askPrice: BigDecimal,
       asks: List<DataTypes.Ask>,
-      quantityRequired: Double
+      quantityRequired: BigDecimal
     ): List<DataTypes.LimitOrderMatch> {
 
       when {
         book.asks.isEmpty() -> {
           return trades
         }
-        //less than
-        bid.price.compareTo(askPrice) < 0 || quantityRequired.compareTo(DataTypes.zero) == 0 -> {
+        bid.price < askPrice || quantityRequired == DataTypes.zero -> {
           return trades
         }
         n >= book.asks.size -> {
@@ -95,7 +95,7 @@ object Bids {
             )
           )
 
-          return if (quantityOutstanding.compareTo(DataTypes.zero) == 0) {
+          return if (quantityOutstanding == zero) {
             trades
           } else {
 
@@ -145,14 +145,14 @@ object Bids {
         )
       })
 
-      match.quantityMatches.filter { it.left.compareTo(DataTypes.zero) == 1 }.forEach { quantityMatch ->
+      match.quantityMatches.filter { it.left > zero }.forEach { quantityMatch ->
         val price = Option.fromNullable(book.asks[match.fillPrice]?.get(quantityMatch.index))
         price.map {
           book.asks[match.fillPrice]?.set(quantityMatch.index, it.copy(quantity = quantityMatch.left))
         }
       }
 
-      match.quantityMatches.filter { it.left.compareTo(DataTypes.zero) == 0 }.forEachIndexed { _, quantityMatch ->
+      match.quantityMatches.filter { it.left == zero }.forEachIndexed { _, quantityMatch ->
         book.asks[match.fillPrice]?.removeIf { it.askId.id == quantityMatch.id }
       }
 
@@ -164,10 +164,10 @@ object Bids {
 
       Trade.getQuantityOutstanding(bid.quantity, match.quantityMatches)
 
-    }.sumOf { it.toDecimalPlaces() }).map {
+    }.sumOf { it }).map {
       when {
         //fully filled with trades and matches then remove
-        (bid.quantity.minus(it) == DataTypes.zero || it.compareTo(DataTypes.zero) == 0) && matches.isNotEmpty()
+        (bid.quantity - it == zero || it == zero) && matches.isNotEmpty()
           && matches.flatMap { qm -> qm.quantityMatches }.isNotEmpty() -> {
           removeBidFrom(book, bid)
         }
@@ -201,7 +201,7 @@ object Bids {
   fun getBidsFor(
     book: DataTypes.LimitOrderBook,
     limit: Int
-  ): List<MutableMap.MutableEntry<Double, MutableList<DataTypes.Bid>>> {
+  ): List<MutableMap.MutableEntry<BigDecimal, MutableList<DataTypes.Bid>>> {
     return book.bids.entries.take(limit)
 
   }
