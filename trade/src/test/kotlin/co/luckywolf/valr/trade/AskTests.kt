@@ -1,5 +1,6 @@
 package co.luckywolf.valr.trade
 
+import co.luckywolf.valr.exchange.Asks
 import co.luckywolf.valr.exchange.Asks.matchAskQuantityToBidQuantities
 import co.luckywolf.valr.exchange.Asks.matchAskToBids
 import co.luckywolf.valr.exchange.Asks.reshuffle
@@ -18,7 +19,9 @@ import co.luckywolf.valr.trade.TestData.ask_49_at_R20
 import co.luckywolf.valr.trade.TestData.ask_49_at_R30
 import co.luckywolf.valr.trade.TestData.ask_50_at_R7
 import co.luckywolf.valr.trade.TestData.ask_5_R5
+import co.luckywolf.valr.trade.TestData.ask_6_at_R10
 import co.luckywolf.valr.trade.TestData.ask_7_R20
+import co.luckywolf.valr.trade.TestData.ask_9_at_R5
 import co.luckywolf.valr.trade.TestData.bid_10_at_R10
 import co.luckywolf.valr.trade.TestData.bid_10_at_R20
 import co.luckywolf.valr.trade.TestData.bid_12_at_R6
@@ -26,7 +29,9 @@ import co.luckywolf.valr.trade.TestData.bid_200_at_20
 import co.luckywolf.valr.trade.TestData.bid_24_at_R26
 import co.luckywolf.valr.trade.TestData.bid_2_at_R7
 import co.luckywolf.valr.trade.TestData.bid_30_R20
+import co.luckywolf.valr.trade.TestData.bid_3_at_R9
 import co.luckywolf.valr.trade.TestData.bid_50_at_R100
+import co.luckywolf.valr.trade.TestData.bid_5_at_R8
 import co.luckywolf.valr.trade.TestData.bid_5_at_R90
 import co.luckywolf.valr.trade.TestData.bid_7_R20
 import org.junit.jupiter.api.Assertions
@@ -56,6 +61,23 @@ class AskTests {
     //println(s)
     //println(one)
 
+  }
+
+  @Test
+  fun fix_failing_test() {
+    val book = DataTypes.LimitOrderBook(DataTypes.CurrencyPair.BTCZAR)
+    book.bids[bid_3_at_R9.price] = mutableListOf(bid_3_at_R9)
+    book.bids[bid_5_at_R8.price] = mutableListOf(bid_5_at_R8)
+    book.asks[ask_6_at_R10.price] = mutableListOf(ask_6_at_R10)
+    val matches = Asks.matchAskToBids(book, ask_9_at_R5)
+    reshuffle(book, ask_9_at_R5, matches)
+
+    Assertions.assertEquals(book.asks.size, 2)
+    Assertions.assertEquals(book.bids.size, 0)
+    Assertions.assertEquals(book.asks[ask_9_at_R5.price]!![0].price, ask_9_at_R5.price)
+    Assertions.assertEquals(book.asks[ask_9_at_R5.price]!![0].quantity, 1.toBigDecimal())
+
+    printBookToConsole(book)
   }
 
   @Test

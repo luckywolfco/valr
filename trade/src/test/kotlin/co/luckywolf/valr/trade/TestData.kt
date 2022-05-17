@@ -12,10 +12,43 @@ object TestData {
     account = DataTypes.Trader("tag")
   )
 
+
   val bid_14_at_R25 = DataTypes.Bid(
     DataTypes.OrderId(sequence = 1),
     14.toBigDecimal(),
     price = 25.toBigDecimal(),
+    DataTypes.CurrencyPair.BTCZAR,
+    account = DataTypes.Trader("tag")
+  )
+
+  val bid_3_at_R9 = DataTypes.Bid(
+    DataTypes.OrderId(sequence = 1),
+    3.toBigDecimal(),
+    price = 9.toBigDecimal(),
+    DataTypes.CurrencyPair.BTCZAR,
+    account = DataTypes.Trader("tag")
+  )
+
+  val bid_5_at_R8 = DataTypes.Bid(
+    DataTypes.OrderId(sequence = 1),
+    5.toBigDecimal(),
+    price = 8.toBigDecimal(),
+    DataTypes.CurrencyPair.BTCZAR,
+    account = DataTypes.Trader("tag")
+  )
+
+  val ask_9_at_R5 = DataTypes.Ask(
+    DataTypes.OrderId(sequence = 1),
+    9.toBigDecimal(),
+    price = 5.toBigDecimal(),
+    DataTypes.CurrencyPair.BTCZAR,
+    account = DataTypes.Trader("tag")
+  )
+
+  val ask_6_at_R10 = DataTypes.Ask(
+    DataTypes.OrderId(sequence = 1),
+    6.toBigDecimal(),
+    price = 10.toBigDecimal(),
     DataTypes.CurrencyPair.BTCZAR,
     account = DataTypes.Trader("tag")
   )

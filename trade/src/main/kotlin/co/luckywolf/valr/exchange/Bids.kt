@@ -1,7 +1,6 @@
 package co.luckywolf.valr.exchange
 
 import arrow.core.Option
-import arrow.core.Some
 import co.luckywolf.valr.protocol.DataTypes
 import co.luckywolf.valr.protocol.DataTypes.zero
 import java.math.BigDecimal
@@ -59,7 +58,7 @@ object Bids {
     if (book.asks.isEmpty())
       return trades
 
-    fun match(
+    tailrec fun match(
       n: Int,
       askPrice: BigDecimal,
       asks: List<DataTypes.Ask>,
@@ -70,7 +69,7 @@ object Bids {
         book.asks.isEmpty() -> {
           return trades
         }
-        bid.price < askPrice || quantityRequired == DataTypes.zero -> {
+        bid.price < askPrice || quantityRequired == zero -> {
           return trades
         }
         n >= book.asks.size -> {
@@ -79,9 +78,6 @@ object Bids {
         else -> {
           val quantityMatches =
             matchBidQuantityToAskQuantities(quantityRequired, asks)
-
-          val quantityOutstanding =
-            Trade.getQuantityOutstanding(quantityRequired, quantityMatches)
 
           trades.add(
             DataTypes.LimitOrderMatch(
@@ -95,20 +91,27 @@ object Bids {
             )
           )
 
-          return if (quantityOutstanding == zero) {
-            trades
-          } else {
+          //nasty
+          val result = try {
+            book.asks.higherEntry(askPrice).key
+            true
 
-            //nasty
-            return try {
-              book.asks.higherEntry(askPrice).key
-              val nextAskPrice = book.asks.higherEntry(askPrice).key
-              val nextAsks = book.asks[nextAskPrice]!!
-              match(n + 1, nextAskPrice, nextAsks, quantityOutstanding)
-            } catch (_: NullPointerException) {
-              trades
-            }
+          } catch (_: NullPointerException) {
+            false
           }
+
+          return if (result) {
+            val nextAskPrice = book.asks.higherEntry(askPrice).key
+            val nextAsks = book.asks[nextAskPrice]!!
+
+            match(
+              n + 1, nextAskPrice, nextAsks,
+              Trade.getQuantityOutstanding(quantityRequired, quantityMatches)
+            )
+          } else match(
+            n + 1, askPrice, asks,
+            Trade.getQuantityOutstanding(quantityRequired, quantityMatches)
+          )
         }
       }
     }
@@ -128,7 +131,7 @@ object Bids {
     matches: List<DataTypes.LimitOrderMatch>
   ): List<DataTypes.LimitOrderMatch> {
 
-    Some(matches.filter { it.tradeSide == DataTypes.Side.BID }.map { match ->
+    matches.map { match ->
 
       //each match is effectively a trade
       book.trades.addAll(match.quantityMatches.map {
@@ -161,23 +164,19 @@ object Bids {
         if (it.isEmpty())
           book.asks.remove(match.fillPrice)
       }
+      match
+    }
 
-      Trade.getQuantityOutstanding(bid.quantity, match.quantityMatches)
-
-    }.sumOf { it }).map {
-      when {
-        //fully filled with trades and matches then remove
-        (bid.quantity - it == zero || it == zero) && matches.isNotEmpty()
-          && matches.flatMap { qm -> qm.quantityMatches }.isNotEmpty() -> {
+    when {
+      matches.isEmpty() -> {
+        addBidTo(book, bid)
+      }
+      else -> {
+        val outstanding = Trade.getQuantityOutstanding(bid.quantity, matches.flatMap { it.quantityMatches })
+        if (outstanding > zero) {
+          addBidTo(book, bid.copy(quantity = outstanding))
+        } else {
           removeBidFrom(book, bid)
-        }
-        //no matches just add to book
-        matches.isEmpty() -> {
-          addBidTo(book, bid)
-        }
-        //matches but only partially filled
-        else -> {
-          addBidTo(book, bid.copy(quantity = it))
         }
       }
     }
