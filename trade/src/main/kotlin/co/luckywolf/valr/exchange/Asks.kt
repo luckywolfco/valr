@@ -147,7 +147,7 @@ object Asks {
           ask.account,
           price = ask.price,
           quantity = ask.quantity,
-          fillSide = DataTypes.Side.ASK,
+          fillSide = DataTypes.Side.BID,
           fillPrice = match.fillPrice,
           fillQuantity = it
         )
