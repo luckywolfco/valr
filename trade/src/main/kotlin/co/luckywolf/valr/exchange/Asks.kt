@@ -52,9 +52,6 @@ object Asks {
           val quantityMatches =
             matchAskQuantityToBidQuantities(quantityRequired, bids)
 
-          //val quantityOutstanding =
-          //  getQuantityOutstanding(quantityRequired, quantityMatches)
-
           trades.add(
             DataTypes.LimitOrderMatch(
               ask.askId,
@@ -67,7 +64,6 @@ object Asks {
             )
           )
 
-          //nasty
           val result = try {
             book.bids.higherEntry(bidPrice).key
             true

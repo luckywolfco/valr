@@ -155,7 +155,7 @@ object Bids {
         }
       }
 
-      match.quantityMatches.filter { it.left == zero }.forEachIndexed { _, quantityMatch ->
+      match.quantityMatches.filter { it.left == zero }.forEach { quantityMatch ->
         book.asks[match.fillPrice]?.removeIf { it.askId.id == quantityMatch.id }
       }
 
